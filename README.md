@@ -22,5 +22,10 @@ Nota: Definimos o raio de ação como o número de células a que um fogo pode d
  
 => Política de Reabastecimento:
 
-1. Encontrar caminho mais próximo para um posto de abastecimento de combustível que passe também por um posto de abastecimento de água:
- 1.1. Se não for possível
+1. Encontrar postos de abastecimento de combustível ao seu alcance:
+  1.1. Caso ele precise de água:
+    1.1.1. verificar se há algum caminho para algum deles que passe por um posto de abastecimento de água:
+      => se houver, opta pelo caminho mais curto;
+      => se não houver, vai para o posto de abastecimento de combustível mais próximo de um posto de abastecimento de água;
+  1.2. Caso ele não precise de água:
+    1.2.1. escolher o posto de abastecimento de combustível a que possa chegar apagando mais incêndios pelo caminho.
