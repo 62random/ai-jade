@@ -1,0 +1,28 @@
+Classes:
+	- Incendiario:
+		- OneShotBehaviour: enviar ao quartel informações relativas ao incêndio que começou
+		- método de iniciar fogo: tendo em conta a posição atual do incendiário muda
+					  o valor dessa célula para, por exemplo, "a arder".
+	
+	- Quartel:
+		- CyclicBehaviour: espera pelas mensagens provenientes do agente incendiário
+		- CyclicBehaviour: espera pelas mensagens provenientes dos agentes combatentes
+		- OneShotBehaviour: comunicar com os agentes combatentes para definir o combatente
+
+	- Combatente
+		- CyclicBehaviour: espera pelas mensagens do quartel para lhe enviar informações
+		- método de apagar fogo: tendo em conta a posição atual do incendiário muda
+					  o valor dessa célula para "extinto".
+	
+		- SubClasses: Drone, Aeronave e Camião
+	
+	- Célula
+		- Classe que tem um estado e uma posição.
+		- Pode ser PA, extinto, incendio ou normal.
+
+	- Interface
+		- método para avaliar combatentes e apresentar resultados	
+
+	- Main
+		- Inicializar agentes e etc.
+		- Inicializar mapa e etc.
