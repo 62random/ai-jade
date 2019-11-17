@@ -6,23 +6,23 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-
 import java.io.IOException;
 
 import jade.core.*;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 
-public class Quartel extends Agent {
+public class HeadQuarter extends Agent {
 	
 	protected void setup() {
 		super.setup();
-		addBehaviour(new ReceberInfoIncendio());
+		addBehaviour(new ReceiveFireInfo());
 	}
-    /*	
-	private class ReceberInfoIncendio extends CyclicBehaviour {
-		
+    
+	private class ReceiveFireInfo extends CyclicBehaviour {
+
 		public void action(){
+			/*	
 			ACLMessage msg= receive();
 			
 			if (msg==null) {block(); return;}
@@ -55,7 +55,8 @@ public class Quartel extends Agent {
 			try{
 			
 			}
+	*/
 		}
 	}
-	*/
+
 }

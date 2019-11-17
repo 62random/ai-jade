@@ -1,26 +1,62 @@
 package Agents;
 
 import jade.core.Agent;
-import javafx.util.Pair;
+import World.Position;
 
-public class Combatente extends Agent {
+public class Fighter extends Agent {
 
-    private static Pair<Integer, Integer> pair;
-    private static Boolean disponibilidade;
+    private Position 	pos;
+    private Boolean 	available;
+    private int 		speed;
+    private int 		waterCapacity;
+    private int 		fuelCapacity;
+    
 
-    public static Pair<Integer, Integer> getPair() {
-        return pair;
+    public Position getPos() {
+		return pos;
+	}
+
+	public void setPos(Position pos) {
+		this.pos = pos;
+	}
+
+	public Boolean isAvailable() {
+        return available;
     }
 
-    public static void setPair(Pair<Integer, Integer> pair) {
-        Combatente.pair = pair;
+    public void setAvailable(Boolean available) {
+    	this.available = available;
+    }
+    
+    public int getSpeed() {
+        return speed;
     }
 
-    public static Boolean getDisponibilidade() {
-        return disponibilidade;
+    public void setSpeed(int speed) {
+    	this.speed = speed;
     }
 
-    public static void setDisponibilidade(Boolean disponibilidade) {
-        Combatente.disponibilidade = disponibilidade;
+    public int getCapAgua() {
+        return waterCapacity;
     }
+
+    public void setWaterCapacity(int waterCapacity) {
+        this.waterCapacity = waterCapacity;
+    }
+
+    public int getFuelCapacity() {
+        return fuelCapacity;
+    }
+
+    public void setFuelCapacity(int fuelCapacity) {
+        this.fuelCapacity = fuelCapacity;
+    }
+    
+    
+    protected void setup() {
+		super.setup();
+
+		this.available = true;
+		
+	}
 }

@@ -9,41 +9,41 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
-import javafx.util.Pair;
+import World.Position;;
 
-public class Incendiario extends Agent {
+public class FireStarter extends Agent {
 
-    private static Pair<Integer, Integer> posicao;
-    private static int intensidade;
+    private Position 	pos;
+    private int 		intensity;
 
-    protected void setup() {
+    public Position getPos() {
+		return pos;
+	}
+
+	public void setPos(Position pos) {
+		this.pos = pos;
+	}
+
+	public int getIntensity() {
+		return intensity;
+	}
+
+	public void setIntensity(int intensity) {
+		this.intensity = intensity;
+	}
+
+	protected void setup() {
 		super.setup();
-		addBehaviour(new InformaIncendio());
+		addBehaviour(new FireNotification());
 	}
     
-    public static Pair<Integer, Integer> getPosicao() {
-        return posicao;
-    }
-
-    public static void setPosicao(Pair<Integer, Integer> posicao) {
-        Incendiario.posicao = posicao;
-    }
-
-    public static int getIntensidade() {
-        return intensidade;
-    }
-
-    public static void setIntensidade(int intensidade) {
-        Incendiario.intensidade = intensidade;
-    }
-    
-    // Classe que permite informar incêndios ao Quartel
-    private class InformaIncendio extends OneShotBehaviour{
+    // Classe que permite informar incï¿½ndios ao Quartel
+    private class FireNotification extends OneShotBehaviour{
     	
     	public void action(){
     		DFAgentDescription dfd = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
-			sd.setType("Quartel");
+			sd.setType("HeadQuarter");
 			dfd.addServices(sd);
 			
 			DFAgentDescription[] results;
@@ -52,9 +52,9 @@ public class Incendiario extends Agent {
 				results = DFService.search(this.myAgent, dfd);
 				DFAgentDescription result = results[0];
 				
-				Incendiario inc = new Incendiario();
-				inc.setPosicao(posicao);
-				inc.setIntensidade(intensidade);
+				FireStarter inc = new FireStarter();
+				inc.setPos(pos);
+				inc.setIntensity(intensity);
 				
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				
