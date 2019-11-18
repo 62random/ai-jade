@@ -11,22 +11,55 @@ import java.io.IOException;
 import jade.core.*;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import World.*;
 
 public class HeadQuarter extends Agent {
 	
+	private WorldMap map;
+	
 	protected void setup() {
 		super.setup();
-		addBehaviour(new ReceiveFireInfo());
+		
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
+		ServiceDescription sd = new ServiceDescription();
+		sd.setName(getLocalName());
+		sd.setType("HeadQuarter");
+		dfd.addServices(sd);
+		
+		try {
+			DFService.register(this, dfd);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+		
+		
+		addBehaviour(new ReceiveInfo());
+		
+		map = (WorldMap) getArguments()[0];
 	}
     
-	private class ReceiveFireInfo extends CyclicBehaviour {
+	private class ReceiveInfo extends CyclicBehaviour {
 
 		public void action(){
-			/*	
-			ACLMessage msg= receive();
+				
+			ACLMessage msg = receive();
 			
 			if (msg==null) {block(); return;}
 			
+			try{
+				Object contentObject = msg.getContentObject();
+				switch(msg.getPerformative()) {
+					case(ACLMessage.INFORM):
+							map.addFighter((Fighter) contentObject);
+							System.out.println("Added agent " + ((Fighter) contentObject).getName());						
+				} 
+			}catch (UnreadableException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			/*
 			try{
 				Object contentObject = msg.getContentObject();
 				switch(msg.getPerformative()) {
@@ -41,9 +74,10 @@ public class HeadQuarter extends Agent {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			*/
 		}
 	}
-	
+	/*
 	private class HandlerCheckCombatentes extends OneShotBehaviour{
 		
 		
@@ -55,8 +89,10 @@ public class HeadQuarter extends Agent {
 			try{
 			
 			}
-	*/
+	
 		}
+		
 	}
+	*/
 
 }

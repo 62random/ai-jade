@@ -57,9 +57,9 @@ public class MainContainer {
 	}
 	
 	public static void main(String[] args) {
-		MainContainer a = new MainContainer();
-		WorldMap map = new WorldMap(200);
-		Object[] objs = new Object[1];
+		MainContainer a 	= new MainContainer();
+		WorldMap map 		= new WorldMap(200);
+		Object[] objs 		= new Object[1];
 		objs[0] = map;
 		
 		a.initMainContainerInPlatform("localhost", "9888", "MainContainer");		
@@ -70,6 +70,40 @@ public class MainContainer {
 			ag.start();
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
+		}
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		for(int i = 0; i < 5; i++) {
+			try {
+				AgentController ag = c.createNewAgent("Truck " + i, "Agents.Truck", objs);// arguments
+				ag.start();
+			} catch (StaleProxyException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		for(int i = 0; i < 10; i++) {
+			try {
+				AgentController ag = c.createNewAgent("Drone " + i, "Agents.Drone", objs);// arguments
+				ag.start();
+			} catch (StaleProxyException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		for(int i = 0; i < 2; i++) {
+			try {
+				AgentController ag = c.createNewAgent("Aircraft " + i, "Agents.Aircraft", objs);// arguments
+				ag.start();
+			} catch (StaleProxyException e) {
+				e.printStackTrace();
+			}
 		}
 
 	}

@@ -1,12 +1,19 @@
 package World;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import Agents.Fighter;
 import java.util.Random;
 import java.util.Map;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 public class WorldMap {
 	
 	private Map<Position, Cell> map;
 	private int 				dimension;
+	private Map<String,Fighter> fighters;
 	
 	
 	public Map<Position, Cell> getMap() {
@@ -25,9 +32,32 @@ public class WorldMap {
 		this.dimension = dimension;
 	}
 
+	public Map<String, Fighter> getFighters() {
+		return fighters;
+	}
+
+	public void setFighters(Map<String, Fighter> fighters) {
+		this.fighters = fighters;
+	}
+	
+	public void addFighter(Fighter f) {
+		fighters.put(f.getAID().toString(), f);
+	}
+	
+	public List<Fighter> fightersAtPosition(Position p) {
+		return fighters.values().stream().filter( a -> a.getPos().equals(p)).collect(Collectors.toList());
+	}
+
 	public WorldMap(int dim) {
-		this.map = new TreeMap<Position, Cell>();
-		this.dimension = dim;
+		this.map 		= new TreeMap<Position, Cell>(
+				new Comparator<Position>() {
+	                @Override
+	                public int compare(Position p1, Position p2) {
+	                    return (p1.getX() + p1.getY()) - (p2.getX() + p2.getY());
+	                }
+	            });
+		this.dimension 	= dim;
+		this.fighters 	= new HashMap<String, Fighter>();
 		
 		Position pos;
 		Cell c;

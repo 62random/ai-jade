@@ -1,6 +1,16 @@
 package Agents;
 
+import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+
+import java.io.IOException;
+
 import World.Position;
 
 public class Fighter extends Agent {
@@ -36,7 +46,7 @@ public class Fighter extends Agent {
     	this.speed = speed;
     }
 
-    public int getCapAgua() {
+    public int getWaterCapacity() {
         return waterCapacity;
     }
 
@@ -57,6 +67,38 @@ public class Fighter extends Agent {
 		super.setup();
 
 		this.available = true;
-		
+		addBehaviour(new NotifyOfExistence());		
 	}
+    
+private class NotifyOfExistence extends OneShotBehaviour{
+    	
+    	public void action(){
+    		DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("HeadQuarter");
+			dfd.addServices(sd);
+			
+			DFAgentDescription[] results;
+			
+			try{
+				results = DFService.search(this.myAgent, dfd);
+				DFAgentDescription result = results[0];
+								
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				
+				AID quartel = result.getName();
+				msg.addReceiver(quartel);
+				
+				try{
+					msg.setContentObject(this.myAgent);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				send(msg);
+				
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+    	}
+    }
 }
