@@ -48,6 +48,12 @@ public class WorldMap {
 		return fighters.values().stream().filter( a -> a.getPos().equals(p)).collect(Collectors.toList());
 	}
 
+	public void changeCellStatus (Position p, boolean burning){
+		Cell c = map.getKey(p);
+		c.setBurning(burning);
+		map.put(p,c);
+	}
+
 	public WorldMap(int dim) {
 		this.map 		= new TreeMap<Position, Cell>(
 				new Comparator<Position>() {

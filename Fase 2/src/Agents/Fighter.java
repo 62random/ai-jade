@@ -67,7 +67,8 @@ public class Fighter extends Agent {
 		super.setup();
 
 		this.available = true;
-		addBehaviour(new NotifyOfExistence());		
+		addBehaviour(new NotifyOfExistence());
+		//addBehaviour(new WaitingForCall());
 	}
     
 private class NotifyOfExistence extends OneShotBehaviour{

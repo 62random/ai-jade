@@ -51,33 +51,26 @@ public class HeadQuarter extends Agent {
 				Object contentObject = msg.getContentObject();
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
+						if(contentObject instanceof Fighter) {
 							map.addFighter((Fighter) contentObject);
-							System.out.println("Added agent " + ((Fighter) contentObject).getName());						
+							System.out.println("Added agent " + ((Fighter) contentObject).getName());
+						}
+						if(contentObject instanceof FireStarter) {
+							map.changeCellStatus(contentObject.getPos(),true);
+							System.out.println("Cell on position " + contentObject.getPos() + " is burning!")
+							addBehaviour(new HandlerCheckCombatentes(myAgent));
+						}
+					/*case(ACLMessage.CONFIRM):
+							addBehaviour(new HandlerEscolheCombatente(myAgent,msg));
+					case(ACLMessage.ACCEPT_PROPOSAL):
+							addBehaviour(new HandlerEnviaCombatente(myAgent,msg)); */
 				} 
 			}catch (UnreadableException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			/*
-			try{
-				Object contentObject = msg.getContentObject();
-				switch(msg.getPerformative()) {
-					case(ACLMessage.INFORM):
-						addBehaviour(new HandlerCheckCombatentes(myAgent));
-					case(ACLMessage.CONFIRM):
-						addBehaviour(new HandlerEscolheCombatente(myAgent,msg));
-					case(ACLMessage.ACCEPT_PROPOSAL):
-						addBehaviour(new HandlerEnviaCombatente(myAgent,msg));
-				}
-			} catch (UnreadableException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
 		}
 	}
-	/*
 	private class HandlerCheckCombatentes extends OneShotBehaviour{
 		
 		
