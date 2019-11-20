@@ -1,6 +1,8 @@
 package World;
 
-public class Position {
+import java.io.Serializable;
+
+public class Position implements Serializable{
 	private int y;
 	private int x;
 	
@@ -29,5 +31,9 @@ public class Position {
 		Position p = (Position) o;
 		
 		return this.x == p.getX() && this.y == p.getY();
+	}
+	
+	public String toString() {
+		return "(" + this.x + ", " + this.y + ")";
 	}
 }

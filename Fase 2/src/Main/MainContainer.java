@@ -81,7 +81,7 @@ public class MainContainer {
 		
 		for(int i = 0; i < 5; i++) {
 			try {
-				AgentController ag = c.createNewAgent("Truck " + i, "Agents.Truck", objs);// arguments
+				AgentController ag = c.createNewAgent("Truck_" + i, "Agents.Truck", objs);// arguments
 				ag.start();
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
@@ -90,7 +90,7 @@ public class MainContainer {
 		
 		for(int i = 0; i < 10; i++) {
 			try {
-				AgentController ag = c.createNewAgent("Drone " + i, "Agents.Drone", objs);// arguments
+				AgentController ag = c.createNewAgent("Drone_" + i, "Agents.Drone", objs);// arguments
 				ag.start();
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
@@ -99,17 +99,18 @@ public class MainContainer {
 		
 		for(int i = 0; i < 2; i++) {
 			try {
-				AgentController ag = c.createNewAgent("Aircraft " + i, "Agents.Aircraft", objs);// arguments
+				AgentController ag = c.createNewAgent("Aircraft_" + i, "Agents.Aircraft", objs);// arguments
 				ag.start();
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
 			}
 		}
-		/*
-		while(true) {
+		
+		int numFire = 0;
+		while(numFire < 1000) {
 			AgentController ag;
 			try {
-				ag = c.createNewAgent("FireStarter", "Agents.FireStarter", objs);
+				ag = c.createNewAgent("FireStarter_"+numFire++, "Agents.FireStarter", objs);
 				ag.start();
 			} catch (StaleProxyException e) {
 				// TODO Auto-generated catch block
@@ -124,7 +125,7 @@ public class MainContainer {
 			}
 			
 		}
-		*/
+		
 
 	}
 

@@ -63,6 +63,7 @@ public class WorldMap {
 	                    return (p1.getX() + p1.getY()) - (p2.getX() + p2.getY());
 	                }
 	            });
+
 		this.dimension 	= dim;
 		this.fighters 	= new HashMap<String, Fighter>();
 		
@@ -77,13 +78,13 @@ public class WorldMap {
 				pos = new Position(i, j);
 				tmp = r.nextInt(100);
 				if(tmp < 1)
-					c = new Cell(pos, true, true);
+					c = new Cell(pos, true, true); 	//Water and fuel
 				else if(tmp < 3)
-					c = new Cell(pos, true, false);
+					c = new Cell(pos, true, false); //Just water
 				else if(tmp < 5)
-					c = new Cell(pos, true, true);
+					c = new Cell(pos, false, true); //Just fuel
 				else				
-					c = new Cell(pos, false, false);
+					c = new Cell(pos, false, false); //Nothing
 				
 				map.put(pos, c);
 			}

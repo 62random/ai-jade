@@ -9,7 +9,10 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
-import World.Position;;
+import java.util.Random;
+
+import World.Position;
+import World.WorldMap;;
 
 public class FireStarter extends Agent {
 
@@ -35,6 +38,12 @@ public class FireStarter extends Agent {
 	protected void setup() {
 		super.setup();
 		addBehaviour(new FireNotification());
+		
+		Random r = new Random();
+		
+		WorldMap map = (WorldMap) getArguments()[0];
+		
+		pos = new Position(r.nextInt(map.getDimension()), r.nextInt(map.getDimension()));
 	}
     
     // Classe que permite informar inc�ndios ao Quartel
