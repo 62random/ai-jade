@@ -105,6 +105,26 @@ public class MainContainer {
 				e.printStackTrace();
 			}
 		}
+		/*
+		while(true) {
+			AgentController ag;
+			try {
+				ag = c.createNewAgent("FireStarter", "Agents.FireStarter", objs);
+				ag.start();
+			} catch (StaleProxyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}// arguments
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		*/
 
 	}
 

@@ -14,6 +14,7 @@ public class WorldMap {
 	private Map<Position, Cell> map;
 	private int 				dimension;
 	private Map<String,Fighter> fighters;
+	private int					nBurningCells = 0;
 	
 	
 	public Map<Position, Cell> getMap() {

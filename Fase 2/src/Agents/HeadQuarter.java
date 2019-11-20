@@ -16,6 +16,7 @@ import World.*;
 public class HeadQuarter extends Agent {
 	
 	private WorldMap map;
+	private Position pos;
 	
 	protected void setup() {
 		super.setup();
@@ -37,6 +38,8 @@ public class HeadQuarter extends Agent {
 		addBehaviour(new ReceiveInfo());
 		
 		map = (WorldMap) getArguments()[0];
+		
+		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 	}
     
 	private class ReceiveInfo extends CyclicBehaviour {

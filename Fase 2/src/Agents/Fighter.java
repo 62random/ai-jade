@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 import java.io.IOException;
 
 import World.Position;
+import World.*;
 
 public class Fighter extends Agent {
 
@@ -68,7 +69,10 @@ public class Fighter extends Agent {
 
 		this.available = true;
 		addBehaviour(new NotifyOfExistence());
-		//addBehaviour(new WaitingForCall());
+		
+		WorldMap map = (WorldMap) getArguments()[0];
+		
+		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 	}
     
 private class NotifyOfExistence extends OneShotBehaviour{
