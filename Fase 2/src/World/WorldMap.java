@@ -49,7 +49,7 @@ public class WorldMap {
 	}
 
 	public void changeCellStatus (Position p, boolean burning){
-		Cell c = map.getKey(p);
+		Cell c = map.get(p);
 		c.setBurning(burning);
 		map.put(p,c);
 	}

@@ -56,8 +56,8 @@ public class HeadQuarter extends Agent {
 							System.out.println("Added agent " + ((Fighter) contentObject).getName());
 						}
 						if(contentObject instanceof FireStarter) {
-							map.changeCellStatus(contentObject.getPos(),true);
-							System.out.println("Cell on position " + contentObject.getPos() + " is burning!")
+							map.changeCellStatus(((FireStarter) contentObject).getPos(),true);
+							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
 							addBehaviour(new HandlerCheckCombatentes(myAgent));
 						}
 					/*case(ACLMessage.CONFIRM):
@@ -79,13 +79,9 @@ public class HeadQuarter extends Agent {
 		}
 
 		public void action() {
-			try{
-			
-			}
 	
 		}
 		
 	}
-	*/
 
 }
