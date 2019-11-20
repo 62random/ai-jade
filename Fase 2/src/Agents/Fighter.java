@@ -22,6 +22,8 @@ public class Fighter extends Agent {
     private int 		speed;
     private int 		waterCapacity;
     private int 		fuelCapacity;
+    private int			currentFuel;
+    private int			currentWater;
     
 
     public Position getPos() {
@@ -62,6 +64,43 @@ public class Fighter extends Agent {
 
     public void setFuelCapacity(int fuelCapacity) {
         this.fuelCapacity = fuelCapacity;
+    }
+    
+
+    public int getCurrentFuel() {
+		return currentFuel;
+	}
+
+	public void setCurrentFuel(int currentFuel) {
+		this.currentFuel = currentFuel;
+	}
+
+	public int getCurrentWater() {
+		return currentWater;
+	}
+
+	public void setCurrentWater(int currentWater) {
+		this.currentWater = currentWater;
+	}
+
+	public void moveRight() {
+    	this.pos.setX(this.pos.getX() + 1);
+    }
+    
+    public void moveLeft() {
+    	this.pos.setX(this.pos.getX() - 1);
+    }
+    
+    public void moveUp() {
+    	this.pos.setX(this.pos.getY() - 1);
+    }
+    
+    public void moveDown() {
+    	this.pos.setX(this.pos.getY() + 1);
+    }
+    
+    public void consumeFuel() {
+    	this.currentFuel--;
     }
     
     
@@ -120,4 +159,72 @@ private class NotifyOfExistence extends OneShotBehaviour{
 			}
     	}
     }
+
+private class MoveAndNotify extends OneShotBehaviour{
+	
+	private Position destination;
+	
+	public MoveAndNotify(Position p) {
+		super();
+		this.destination = p;
+	}
+	
+	public void action(){	
+		
+		if (destination.equals(((Fighter) myAgent).getPos())) {
+			block();
+		}
+		else {
+			Fighter me = ((Fighter) myAgent);
+			Position p = me.getPos();
+			
+			//substituir mais tarde o que está aqui no meio por comportamento inteligente
+			if(p.getX() > destination.getX() ) {
+				me.moveRight();
+			}
+			else if(p.getX() < destination.getX()) {
+				me.moveLeft();
+			}
+			else if(p.getY() > destination.getY()) {
+				me.moveDown();
+			}
+			else {
+				me.moveUp();
+			}
+			//substituir mais tarde o que está aqui no meio por comportamento inteligente
+			
+			me.consumeFuel();
+			
+			//TODO se passou num incêndio apaga-o
+		
+		}
+		
+		DFAgentDescription dfd = new DFAgentDescription();
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("HeadQuarter");
+		dfd.addServices(sd);
+		
+		DFAgentDescription[] results;
+		
+		try{
+			results = DFService.search(this.myAgent, dfd);
+			DFAgentDescription result = results[0];
+							
+			ACLMessage msg = new ACLMessage(ACLMessage.CONFIRM);
+			
+			AID quartel = result.getName();
+			msg.addReceiver(quartel);
+			
+			try{
+				msg.setContentObject(this.myAgent);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			send(msg);
+			
+		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
+	}
+}
 }

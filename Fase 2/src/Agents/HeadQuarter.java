@@ -70,6 +70,10 @@ public class HeadQuarter extends Agent {
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
 							addBehaviour(new HandlerCheckCombatentes(map.getnBurningCells()));
 						}
+					case(ACLMessage.CONFIRM):
+						if(contentObject instanceof Fighter) {
+							
+						}
 					/*case(ACLMessage.CONFIRM):
 							addBehaviour(new HandlerEscolheCombatente(myAgent,msg));
 					case(ACLMessage.ACCEPT_PROPOSAL):
