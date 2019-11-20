@@ -7,11 +7,14 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.List;
 
 import jade.core.*;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import World.*;
+import jade.tools.sniffer.Message;
 
 public class HeadQuarter extends Agent {
 	
@@ -60,9 +63,12 @@ public class HeadQuarter extends Agent {
 							System.out.println("Added agent " + ((Fighter) contentObject).getName());
 						}
 						if(contentObject instanceof FireStarter) {
+							map.setnBurningCells(map.getnBurningCells());
+							Fire fire = new Fire(((FireStarter) contentObject).getPos(),((FireStarter) contentObject).getIntensity());
+							map.addFire(fire);
 							map.changeCellStatus(((FireStarter) contentObject).getPos(),true);
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
-							addBehaviour(new HandlerCheckCombatentes(myAgent));
+							addBehaviour(new HandlerCheckCombatentes(map.getnBurningCells()));
 						}
 					/*case(ACLMessage.CONFIRM):
 							addBehaviour(new HandlerEscolheCombatente(myAgent,msg));
@@ -76,14 +82,60 @@ public class HeadQuarter extends Agent {
 		}
 	}
 	private class HandlerCheckCombatentes extends OneShotBehaviour{
+
+		private int fireID;
 		
-		
-		public HandlerCheckCombatentes(Agent a){
-			super(a);
+		public HandlerCheckCombatentes(int fireID){
+			this.fireID = fireID;
 		}
 
 		public void action() {
-	
+			Fire targetFire = map.getFires().get(fireID);
+			List<FighterInfo> closestFighters = map.calculateClosestFighters(targetFire.getPos());
+			FighterInfo chosenFighter = null;
+
+			while(chosenFighter == null) {
+				for (FighterInfo fighter : closestFighters) {
+					if (fighter.isAvailable()) {
+						chosenFighter = fighter;
+						break;
+					}
+				}
+			}
+
+			try{
+				DFAgentDescription dfd = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("Fighter");
+				dfd.addServices(sd);
+
+				DFAgentDescription[] results = DFService.search(this.myAgent, dfd);
+				AID provider = new AID();
+
+				if (results.length > 0) {
+					for (int i = 0; i < results.length; ++i) {
+						DFAgentDescription dfd1 = results[i];
+						provider = dfd1.getName();
+
+						if(provider.toString().equals(chosenFighter.getAID())) break;
+					}
+
+					System.out.println("Requesting help from fighter: " + chosenFighter.getAID());
+					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+					msg.addReceiver(provider);
+
+					try{
+						msg.setContentObject(targetFire);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				else {
+					System.out.println("Fighter " + chosenFighter.getAID() + " not found!");
+				}
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}

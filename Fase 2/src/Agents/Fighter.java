@@ -68,6 +68,19 @@ public class Fighter extends Agent {
     protected void setup() {
 		super.setup();
 
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
+		ServiceDescription sd = new ServiceDescription();
+		sd.setName(getLocalName());
+		sd.setType("Fighter");
+		dfd.addServices(sd);
+
+		try {
+			DFService.register(this, dfd);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+
 		this.available = true;
 		addBehaviour(new NotifyOfExistence());
 		
