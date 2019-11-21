@@ -1,19 +1,17 @@
 package World;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
+import Agents.Fighter;
+import sun.reflect.generics.tree.Tree;
 
-import java.util.Random;
-import java.util.Map;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class WorldMap {
 	
-	private Map<Position, Cell> map;
-	private int 				dimension;
+	private Map<Position, Cell> 	map;
+	private int 					dimension;
 	private Map<String,FighterInfo> fighters;
-	private int					nBurningCells = 0;
+	private Map<Integer,Fire> 		fires;
+	private int						nBurningCells = 0;
 	
 	
 	public Map<Position, Cell> getMap() {
@@ -48,10 +46,51 @@ public class WorldMap {
 		return fighters.values().stream().filter( a -> a.getPos().equals(p)).collect(Collectors.toList());
 	}
 
+	public Map<Integer, Fire> getFires() {
+		return fires;
+	}
+
+	public void setFires(Map<Integer, Fire> fires) {
+		this.fires = fires;
+	}
+
+	public void addFire(Fire f) {
+		fires.put(nBurningCells, f);
+	}
+
+	public int getnBurningCells() {
+		return nBurningCells;
+	}
+
+	public void setnBurningCells(int nBurningCells) {
+		this.nBurningCells = nBurningCells+1;
+	}
+
 	public void changeCellStatus (Position p, boolean burning){
 		Cell c = map.get(p);
 		c.setBurning(burning);
 		map.put(p,c);
+	}
+
+	public TreeMap<Double,FighterInfo> sortByKey(Map<Double, FighterInfo> fighterDistances){
+		TreeMap<Double,FighterInfo> sorted = new TreeMap<>();
+		sorted.putAll(fighterDistances);
+		return sorted;
+	}
+
+	public List<FighterInfo> calculateClosestFighters (Position p){
+		Map<Double,FighterInfo> distFightersMap = new HashMap<Double, FighterInfo>();
+
+		for (FighterInfo f: fighters.values()) {
+			double distance = p.distanceBetweenTwoPositions(f.getPos());
+			distFightersMap.put(distance,f);
+		}
+
+		TreeMap<Double,FighterInfo> orderedFightersMap = sortByKey(distFightersMap);
+		List<FighterInfo> orderedFightersList = new ArrayList<FighterInfo>(orderedFightersMap.values());
+
+		return  orderedFightersList;
+
 	}
 
 	public WorldMap(int dim) {
@@ -65,6 +104,7 @@ public class WorldMap {
 
 		this.dimension 	= dim;
 		this.fighters 	= new HashMap<String, FighterInfo>();
+		this.fires 		= new HashMap<Integer, Fire>();
 		
 		Position pos;
 		Cell c;

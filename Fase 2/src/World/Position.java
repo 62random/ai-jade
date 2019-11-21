@@ -40,4 +40,11 @@ public class Position implements Serializable{
 	public String toString() {
 		return "(" + this.x + ", " + this.y + ")";
 	}
+
+	public double distanceBetweenTwoPositions(Position p2){
+		double ac = Math.abs(p2.getY() - this.x);
+		double cb = Math.abs(p2.getX() - this.y);
+
+		return  Math.hypot(ac,cb);
+	}
 }
