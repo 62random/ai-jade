@@ -103,7 +103,7 @@ public class Fighter extends Agent {
     public void consumeFuel() {
     	this.currentFuel--;
     }
-    
+
     protected void setup() {
 		super.setup();
 
