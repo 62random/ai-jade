@@ -2,6 +2,7 @@ package Agents;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -103,7 +104,6 @@ public class Fighter extends Agent {
     	this.currentFuel--;
     }
     
-    
     protected void setup() {
 		super.setup();
 
@@ -113,7 +113,9 @@ public class Fighter extends Agent {
 		WorldMap map = (WorldMap) getArguments()[0];
 		
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
-	}
+
+    }
+
     
 private class NotifyOfExistence extends OneShotBehaviour{
     	

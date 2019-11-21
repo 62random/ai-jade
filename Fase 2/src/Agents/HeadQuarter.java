@@ -66,7 +66,11 @@ public class HeadQuarter extends Agent {
 						}
 					case(ACLMessage.CONFIRM):
 						if(contentObject instanceof Fighter) {
-							
+							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getAID().toString());
+							if (fInfo != null) {
+								fInfo.setPos(((Fighter) contentObject).getPos());
+								System.out.println("Updated agent " + (fInfo.getAID() + " to position " + fInfo.getPos()));
+							}
 						}
 					/*case(ACLMessage.CONFIRM):
 							addBehaviour(new HandlerEscolheCombatente(myAgent,msg));

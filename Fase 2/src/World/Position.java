@@ -20,6 +20,10 @@ public class Position implements Serializable{
 		this.x = x;
 	}
 	
+	public Position reverse() {
+		return new Position(y,x);
+	}
+	
 	public Position(int x, int y) {
 		this.x = x;
 		this.y = y;
