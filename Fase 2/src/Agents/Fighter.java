@@ -168,10 +168,12 @@ private class NotifyOfExistence extends OneShotBehaviour{
 private class MoveAndNotify extends OneShotBehaviour{
 	
 	private Position destination;
+	private Boolean available;
 	
-	public MoveAndNotify(Position p) {
+	public MoveAndNotify(Position p,boolean availability) {
 		super();
 		this.destination = p;
+		this.available = availability;
 	}
 	
 	public void action(){
@@ -181,6 +183,7 @@ private class MoveAndNotify extends OneShotBehaviour{
 		}
 		else {
 			Fighter me = ((Fighter) myAgent);
+			me.setAvailable(available);
 			Position p = me.getPos();
 			
 			//substituir mais tarde o que está aqui no meio por comportamento inteligente
@@ -246,10 +249,8 @@ private class MoveToFire extends CyclicBehaviour{
                 switch (msg.getPerformative()) {
                     case(ACLMessage.REQUEST):
                         if(contentObject instanceof Fire){
-                            Fighter me = ((Fighter) myAgent);
-                            ((Fighter) myAgent).setAvailable(false);
                             Position destination = (((Fire) contentObject).getPos());
-                            addBehaviour(new MoveAndNotify(destination));
+                            addBehaviour(new MoveAndNotify(destination,false));
                         }
                 }
             } catch (UnreadableException e) {

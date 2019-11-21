@@ -73,10 +73,12 @@ public class HeadQuarter extends Agent {
 						}
 					case(ACLMessage.CONFIRM):
 						if(contentObject instanceof Fighter) {
-							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getAID().toString());
+							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
 							if (fInfo != null) {
 								fInfo.setPos(((Fighter) contentObject).getPos());
-								System.out.println("Updated agent " + (fInfo.getAID() + " to position " + fInfo.getPos()));
+								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
+								map.changeFighterData(fInfo.getAID(),fInfo);
+								System.out.println("Updated agent " + (fInfo.getAID() + " to position " + fInfo.getPos() + " with availability " + fInfo.isAvailable()));
 							}
 						}
 					/*case(ACLMessage.ACCEPT_PROPOSAL):
@@ -103,7 +105,7 @@ public class HeadQuarter extends Agent {
 
 			while(chosenFighter == null) {
 				for (FighterInfo fighter : closestFighters.values()) {
-					if (fighter.isAvailable() == true) {
+					if (fighter.isAvailable()) {
 						chosenFighter = fighter;
 						break;
 					}
@@ -120,15 +122,12 @@ public class HeadQuarter extends Agent {
 				AID provider = new AID();
 
 				if (results.length > 0) {
-					for (int i = 0; i < results.length; ++i) {
-						DFAgentDescription dfd1 = results[i];
+					for (DFAgentDescription dfd1 : results) {
 						provider = dfd1.getName();
-
-						if(provider.toString().equals(chosenFighter.getAID())) break;
+						if (provider.toString().equals(chosenFighter.getAID())) break;
 					}
 
 					System.out.println("Requesting help from fighter: " + provider.getName());
-					map.changeFighterAvailability(chosenFighter.getAID(),false);
 					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 					msg.addReceiver(provider);
 

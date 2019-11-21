@@ -1,5 +1,6 @@
 package World;
 import Agents.Fighter;
+import javafx.geometry.Pos;
 import sun.reflect.generics.tree.Tree;
 
 import java.util.*;
@@ -82,6 +83,7 @@ public class WorldMap {
 		Map<Double,FighterInfo> distFightersMap = new HashMap<>();
 
 		for (FighterInfo f: fighters.values()) {
+			System.out.println("Fighter " + f.getAID() + "availability" + f.isAvailable() );
 			double distance = p.distanceBetweenTwoPositions(f.getPos());
 			distFightersMap.put(distance,f);
 		}
@@ -90,13 +92,15 @@ public class WorldMap {
 
 		System.out.println(orderedFightersMap.toString());
 
+		for (FighterInfo f: distFightersMap.values()) {
+			System.out.print(f.isAvailable());
+		}
+
 		return  orderedFightersMap;
 	}
 
-	public void changeFighterAvailability(String fname,boolean availability){
-		FighterInfo fighter = fighters.get(fname);
-		fighter.setAvailable(availability);
-		fighters.put(fname,fighter);
+	public void changeFighterData(String fname,FighterInfo f){
+		fighters.put(fname,f);
 	}
 
 	public WorldMap(int dim) {
