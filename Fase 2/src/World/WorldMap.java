@@ -78,19 +78,25 @@ public class WorldMap {
 		return sorted;
 	}
 
-	public List<FighterInfo> calculateClosestFighters (Position p){
-		Map<Double,FighterInfo> distFightersMap = new HashMap<Double, FighterInfo>();
+	public TreeMap<Double,FighterInfo> calculateClosestFighters (Position p){
+		Map<Double,FighterInfo> distFightersMap = new HashMap<>();
 
 		for (FighterInfo f: fighters.values()) {
 			double distance = p.distanceBetweenTwoPositions(f.getPos());
 			distFightersMap.put(distance,f);
 		}
 
-		TreeMap<Double,FighterInfo> orderedFightersMap = sortByKey(distFightersMap);
-		List<FighterInfo> orderedFightersList = new ArrayList<FighterInfo>(orderedFightersMap.values());
+		TreeMap<Double,FighterInfo> orderedFightersMap = new TreeMap<>(sortByKey(distFightersMap));
 
-		return  orderedFightersList;
+		System.out.println(orderedFightersMap.toString());
 
+		return  orderedFightersMap;
+	}
+
+	public void changeFighterAvailability(String fname,boolean availability){
+		FighterInfo fighter = fighters.get(fname);
+		fighter.setAvailable(availability);
+		fighters.put(fname,fighter);
 	}
 
 	public WorldMap(int dim) {

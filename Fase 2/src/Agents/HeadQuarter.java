@@ -9,6 +9,7 @@ import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.TreeMap;
 
 import jade.core.*;
 import jade.core.behaviours.CyclicBehaviour;
@@ -78,9 +79,7 @@ public class HeadQuarter extends Agent {
 								System.out.println("Updated agent " + (fInfo.getAID() + " to position " + fInfo.getPos()));
 							}
 						}
-					/*case(ACLMessage.CONFIRM):
-							addBehaviour(new HandlerEscolheCombatente(myAgent,msg));
-					case(ACLMessage.ACCEPT_PROPOSAL):
+					/*case(ACLMessage.ACCEPT_PROPOSAL):
 							addBehaviour(new HandlerEnviaCombatente(myAgent,msg)); */
 				} 
 			}catch (UnreadableException e) {
@@ -99,12 +98,12 @@ public class HeadQuarter extends Agent {
 
 		public void action() {
 			Fire targetFire = map.getFires().get(fireID);
-			List<FighterInfo> closestFighters = map.calculateClosestFighters(targetFire.getPos());
+			TreeMap<Double,FighterInfo> closestFighters = map.calculateClosestFighters(targetFire.getPos());
 			FighterInfo chosenFighter = null;
 
 			while(chosenFighter == null) {
-				for (FighterInfo fighter : closestFighters) {
-					if (fighter.isAvailable()) {
+				for (FighterInfo fighter : closestFighters.values()) {
+					if (fighter.isAvailable() == true) {
 						chosenFighter = fighter;
 						break;
 					}
@@ -128,7 +127,8 @@ public class HeadQuarter extends Agent {
 						if(provider.toString().equals(chosenFighter.getAID())) break;
 					}
 
-					System.out.println("Requesting help from fighter: " + chosenFighter.getAID());
+					System.out.println("Requesting help from fighter: " + provider.getName());
+					map.changeFighterAvailability(chosenFighter.getAID(),false);
 					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 					msg.addReceiver(provider);
 
@@ -137,6 +137,7 @@ public class HeadQuarter extends Agent {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+					send(msg);
 				}
 				else {
 					System.out.println("Fighter " + chosenFighter.getAID() + " not found!");

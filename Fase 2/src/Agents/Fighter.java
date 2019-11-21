@@ -15,6 +15,7 @@ import java.io.Serializable;
 
 import World.Position;
 import World.*;
+import jade.lang.acl.UnreadableException;
 
 public class Fighter extends Agent {
 
@@ -127,6 +128,8 @@ public class Fighter extends Agent {
 		
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 
+		addBehaviour(new MoveToFire());
+
     }
 
     
@@ -171,8 +174,8 @@ private class MoveAndNotify extends OneShotBehaviour{
 		this.destination = p;
 	}
 	
-	public void action(){	
-		
+	public void action(){
+
 		if (destination.equals(((Fighter) myAgent).getPos())) {
 			block();
 		}
@@ -228,5 +231,30 @@ private class MoveAndNotify extends OneShotBehaviour{
 			e.printStackTrace();
 		}
 	}
+}
+
+private class MoveToFire extends CyclicBehaviour{
+
+        public void action(){
+
+            ACLMessage msg = receive();
+
+            if (msg==null) {block(); return;}
+
+            try{
+                Object contentObject = msg.getContentObject();
+                switch (msg.getPerformative()) {
+                    case(ACLMessage.REQUEST):
+                        if(contentObject instanceof Fire){
+                            Fighter me = ((Fighter) myAgent);
+                            ((Fighter) myAgent).setAvailable(false);
+                            Position destination = (((Fire) contentObject).getPos());
+                            addBehaviour(new MoveAndNotify(destination));
+                        }
+                }
+            } catch (UnreadableException e) {
+                e.printStackTrace();
+            }
+        }
 }
 }
