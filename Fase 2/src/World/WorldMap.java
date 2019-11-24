@@ -73,30 +73,20 @@ public class WorldMap {
 		map.put(p,c);
 	}
 
-	public TreeMap<Double,FighterInfo> sortByKey(Map<Double, FighterInfo> fighterDistances){
-		TreeMap<Double,FighterInfo> sorted = new TreeMap<>();
-		sorted.putAll(fighterDistances);
-		return sorted;
-	}
+	public Map<String,Double> calculateClosestFighters (Position p){
+		Map<String,Double> distFightersMap = new HashMap<>();
 
-	public TreeMap<Double,FighterInfo> calculateClosestFighters (Position p){
-		Map<Double,FighterInfo> distFightersMap = new HashMap<>();
-
-		for (FighterInfo f: fighters.values()) {
-			System.out.println("Fighter " + f.getAID() + "availability" + f.isAvailable() );
-			double distance = p.distanceBetweenTwoPositions(f.getPos());
-			distFightersMap.put(distance,f);
+		for (String fighterID: fighters.keySet()) {
+			double distance = p.distanceBetweenTwoPositions(fighters.get(fighterID).getPos());
+			distFightersMap.put(fighterID, distance);
 		}
 
-		TreeMap<Double,FighterInfo> orderedFightersMap = new TreeMap<>(sortByKey(distFightersMap));
+		final Map<String, Double> sortedByDistance = distFightersMap.entrySet()
+						.stream()
+						.sorted((Map.Entry.<String,Double>comparingByValue()))
+						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2) -> e1, LinkedHashMap::new));
 
-		System.out.println(orderedFightersMap.toString());
-
-		for (FighterInfo f: distFightersMap.values()) {
-			System.out.print(f.isAvailable());
-		}
-
-		return  orderedFightersMap;
+		return  sortedByDistance;
 	}
 
 	public void changeFighterData(String fname,FighterInfo f){

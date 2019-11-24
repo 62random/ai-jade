@@ -9,6 +9,7 @@ import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import jade.core.*;
@@ -78,7 +79,6 @@ public class HeadQuarter extends Agent {
 								fInfo.setPos(((Fighter) contentObject).getPos());
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(),fInfo);
-								System.out.println("Updated agent " + (fInfo.getAID() + " to position " + fInfo.getPos() + " with availability " + fInfo.isAvailable()));
 							}
 						}
 					/*case(ACLMessage.ACCEPT_PROPOSAL):
@@ -100,12 +100,13 @@ public class HeadQuarter extends Agent {
 
 		public void action() {
 			Fire targetFire = map.getFires().get(fireID);
-			TreeMap<Double,FighterInfo> closestFighters = map.calculateClosestFighters(targetFire.getPos());
-			FighterInfo chosenFighter = null;
+			Map<String,FighterInfo> fighters = map.getFighters();
+			Map<String,Double> closestFighters = map.calculateClosestFighters(targetFire.getPos());
+			String chosenFighter = null;
 
 			while(chosenFighter == null) {
-				for (FighterInfo fighter : closestFighters.values()) {
-					if (fighter.isAvailable()) {
+				for (String fighter : closestFighters.keySet()) {
+					if(fighters.get(fighter).isAvailable()) {
 						chosenFighter = fighter;
 						break;
 					}
@@ -124,7 +125,7 @@ public class HeadQuarter extends Agent {
 				if (results.length > 0) {
 					for (DFAgentDescription dfd1 : results) {
 						provider = dfd1.getName();
-						if (provider.toString().equals(chosenFighter.getAID())) break;
+						if (provider.getName().equals(chosenFighter)) break;
 					}
 
 					System.out.println("Requesting help from fighter: " + provider.getName());
@@ -139,7 +140,7 @@ public class HeadQuarter extends Agent {
 					send(msg);
 				}
 				else {
-					System.out.println("Fighter " + chosenFighter.getAID() + " not found!");
+					System.out.println("Fighter " + chosenFighter + " not found!");
 				}
 			} catch (FIPAException e) {
 				e.printStackTrace();
