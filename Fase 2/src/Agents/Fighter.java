@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 
 import World.Position;
 import World.*;
@@ -67,7 +68,6 @@ public class Fighter extends Agent {
     public void setFuelCapacity(int fuelCapacity) {
         this.fuelCapacity = fuelCapacity;
     }
-    
 
     public int getCurrentFuel() {
 		return currentFuel;
@@ -104,6 +104,7 @@ public class Fighter extends Agent {
     public void consumeFuel() {
     	this.currentFuel--;
     }
+    
 
     protected void setup() {
 		super.setup();

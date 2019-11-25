@@ -47,4 +47,17 @@ public class Position implements Serializable{
 
 		return  Math.hypot(ac,cb);
 	}
+
+	public boolean isAdjacent(Position p2){
+		if(this.x == p2.getX()+1 && this.y == p2.getY()+1){ return true; }
+		if(this.x == p2.getX()+1 && this.y == p2.getY()){ return true; }
+		if(this.x == p2.getX()+1 && this.y == p2.getY()-1){ return true; }
+		if(this.x == p2.getX() && this.y == p2.getY()-1){ return true; }
+		if(this.x == p2.getX()-1 && this.y == p2.getY()-1){ return true; }
+		if(this.x == p2.getX()-1 && this.y == p2.getY()) {return true; }
+		if(this.x == p2.getX()-1 && this.y == p2.getY()+1){ return true; }
+		if(this.x == p2.getX() && this.y == p2.getY()+1){ return true; }
+
+		return false;
+	}
 }

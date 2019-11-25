@@ -10,8 +10,6 @@ public class Drone extends Fighter {
 		this.setFuelCapacity(5);
 		this.setCurrentFuel(this.getFuelCapacity());
 		this.setCurrentWater(this.getWaterCapacity());
-		
-		//exemplo da ficha da loja
-		//addBehaviour(new Comprarproduto()); // fazer a compra de um produto
+
 	}
 }
