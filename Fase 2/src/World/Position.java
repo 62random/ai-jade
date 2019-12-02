@@ -1,6 +1,8 @@
 package World;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Position implements Serializable{
 	private int y;
@@ -59,5 +61,29 @@ public class Position implements Serializable{
 		if(this.x == p2.getX() && this.y == p2.getY()+1){ return true; }
 
 		return false;
+	}
+
+	public Position getAdjacentLeft(Position p){
+		Position position = new Position(p.getX(), p.getY());
+		position.setX(p.getX()-1);
+		return position;
+	}
+
+	public Position getAdjacentRight(Position p){
+		Position position = new Position(p.getX(), p.getY());
+		position.setX(p.getX()+1);
+		return position;
+	}
+
+	public Position getAdjacentUp(Position p){
+		Position position = new Position(p.getX(), p.getY());
+		position.setX(p.getY()+1);
+		return position;
+	}
+
+	public Position getAdjacentDown(Position p){
+		Position position = new Position(p.getX(), p.getY());
+		position.setX(p.getY()-1);
+		return position;
 	}
 }

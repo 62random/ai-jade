@@ -2,6 +2,7 @@ package World;
 import Agents.Fighter;
 import javafx.geometry.Pos;
 import sun.reflect.generics.tree.Tree;
+import sun.tools.tree.PostIncExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,6 +72,31 @@ public class WorldMap {
 		Cell c = map.get(p);
 		c.setBurning(burning);
 		map.put(p,c);
+	}
+
+	public void propagateFire(Position p, Fire f){
+		Position position1 = p.getAdjacentRight(p);
+		Position position2 = p.getAdjacentLeft(p);
+		Position position3 = p.getAdjacentDown(p);
+		Position position4 = p.getAdjacentUp(p);
+
+		Cell c1 = map.get(position1);
+		Cell c2 = map.get(position2);
+		Cell c3 = map.get(position3);
+		Cell c4 = map.get(position4);
+		if(f.getIntensity() > 4){
+			c1.setBurning(true);
+			c2.setBurning(true);
+			c3.setBurning(true);
+			c4.setBurning(true);
+		}
+		else if(f.getIntensity() < 4 && f.getIntensity() > 1){
+			c1.setBurning(true);
+			c2.setBurning(true);
+		}
+		else{
+			c1.setBurning(true);
+		}
 	}
 
 	public Map<String,Double> calculateClosestFighters (Position p){
