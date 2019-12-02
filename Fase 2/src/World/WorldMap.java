@@ -76,10 +76,10 @@ public class WorldMap {
 
 		if(fires.size()>0) {
 
-			Random rand = new Random();
-			int randFire = rand.nextInt(nBurningCells + 1);
+			Random generator = new Random();
+			Object[] values = fires.values().toArray();
+			Fire f = (Fire) values[generator.nextInt(values.length)];
 
-			Fire f = fires.get(randFire);
 			Position p = f.getPos();
 
 			Position position1 = p.getAdjacentRight(p);
@@ -136,8 +136,19 @@ public class WorldMap {
 		fighters.put(fname,f);
 	}
 
-	public void extinguishFire(Fire f){
-		fires.remove(f);
+	public void extinguishFire(Position pos){
+		Integer removalKey = null;
+
+		for (Map.Entry<Integer,Fire> entry: fires.entrySet()) {
+			if(entry.getValue().getPos().equals(pos)){
+				removalKey = entry.getKey();
+				break;
+			}
+		}
+
+		if(removalKey != null) {
+			fires.remove(removalKey);
+		}
 	}
 
 	public WorldMap(int dim) {

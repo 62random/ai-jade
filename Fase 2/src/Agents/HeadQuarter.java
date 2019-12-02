@@ -90,11 +90,7 @@ public class HeadQuarter extends Agent {
 							if (fInfo != null) {
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(), fInfo);
-								for (Fire f : map.getFires().values()) {
-									if (f.getPos().equals(fInfo.getPos())) {
-										map.extinguishFire(f);
-									}
-								}
+								map.extinguishFire(fInfo.getPos());
 								System.out.println("Fire on position " + fInfo.getPos() + " was extinguished");
 							}
 						}

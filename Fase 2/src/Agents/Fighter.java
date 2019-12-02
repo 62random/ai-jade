@@ -105,6 +105,8 @@ public class Fighter extends Agent {
     public void consumeFuel() {
     	this.currentFuel--;
     }
+
+    public void consumeWater() {this.currentWater--; }
     
 
     protected void setup() {
@@ -170,25 +172,23 @@ private class NotifyOfExistence extends OneShotBehaviour{
 private class MoveAndNotify extends OneShotBehaviour {
 	
 	private Position destination;
-	private Boolean available;
 	
-	public MoveAndNotify(Position p,boolean availability) {
+	public MoveAndNotify(Position p) {
 		super();
 		this.destination = p;
-		this.available = availability;
 	}
 
 	@Override
 	public void action() {
 		Integer performative = 0;
+		Fighter me = ((Fighter) myAgent);
 
-		if (destination.equals(((Fighter) myAgent).getPos())) {
+		if (destination.equals(me.getPos())) {
+			me.consumeWater();
 			performative = ACLMessage.CONFIRM;
-			block();
 		}
 		else {
-			Fighter me = ((Fighter) myAgent);
-			me.setAvailable(available);
+			me.setAvailable(false);
 			Position p = me.getPos();
 			performative = ACLMessage.ACCEPT_PROPOSAL;
 
@@ -217,7 +217,7 @@ private class MoveAndNotify extends OneShotBehaviour {
 				e.printStackTrace();
 			}
 
-			me.addBehaviour(new MoveAndNotify(destination,available));
+			me.addBehaviour(new MoveAndNotify(destination));
 
 		}
 
@@ -264,7 +264,7 @@ private class MoveToFire extends CyclicBehaviour{
                     case(ACLMessage.PROPOSE):
                         if(contentObject instanceof Fire){
                             Position destination = (((Fire) contentObject).getPos());
-                            addBehaviour(new MoveAndNotify(destination,false));
+                            addBehaviour(new MoveAndNotify(destination));
                         }
                 }
             } catch (UnreadableException e) {
