@@ -73,7 +73,7 @@ public class HeadQuarter extends Agent {
 							addBehaviour(new HandlerCheckCombatentes(map.getnBurningCells()));
 						}
 						break;
-					case(ACLMessage.CONFIRM):
+					case(ACLMessage.ACCEPT_PROPOSAL):
 						if(contentObject instanceof Fighter) {
 							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
 							if (fInfo != null && !((Fighter) contentObject).isAvailable()) {
@@ -84,7 +84,7 @@ public class HeadQuarter extends Agent {
 							}
 						}
 						break;
-					case(ACLMessage.PROPOSE):
+					case(ACLMessage.CONFIRM):
 						if(contentObject instanceof Fighter) {
 							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
 							if (fInfo != null) {
@@ -145,7 +145,7 @@ public class HeadQuarter extends Agent {
 					}
 
 					System.out.println("Requesting help from fighter: " + provider.getName());
-					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 					msg.addReceiver(provider);
 
 					try{

@@ -1,8 +1,6 @@
 package World;
 import Agents.Fighter;
 import javafx.geometry.Pos;
-import sun.reflect.generics.tree.Tree;
-import sun.tools.tree.PostIncExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,29 +72,48 @@ public class WorldMap {
 		map.put(p,c);
 	}
 
-	public void propagateFire(Position p, Fire f){
-		Position position1 = p.getAdjacentRight(p);
-		Position position2 = p.getAdjacentLeft(p);
-		Position position3 = p.getAdjacentDown(p);
-		Position position4 = p.getAdjacentUp(p);
+	public void propagateFire(){
 
-		Cell c1 = map.get(position1);
-		Cell c2 = map.get(position2);
-		Cell c3 = map.get(position3);
-		Cell c4 = map.get(position4);
-		if(f.getIntensity() > 4){
-			c1.setBurning(true);
-			c2.setBurning(true);
-			c3.setBurning(true);
-			c4.setBurning(true);
+		if(fires.size()>0) {
+
+			Random rand = new Random();
+			int randFire = rand.nextInt(nBurningCells + 1);
+
+			Fire f = fires.get(randFire);
+			Position p = f.getPos();
+
+			Position position1 = p.getAdjacentRight(p);
+			Position position2 = p.getAdjacentLeft(p);
+			Position position3 = p.getAdjacentDown(p);
+			Position position4 = p.getAdjacentUp(p);
+
+			Cell c1 = map.get(position1);
+			Cell c2 = map.get(position2);
+			Cell c3 = map.get(position3);
+			Cell c4 = map.get(position4);
+
+			if (f.getIntensity() > 4) {
+				c1.setBurning(true);
+				c2.setBurning(true);
+				c3.setBurning(true);
+				c4.setBurning(true);
+				map.put(position1, c1);
+				map.put(position2, c2);
+				map.put(position3, c3);
+				map.put(position4, c4);
+			} else if (f.getIntensity() < 4 && f.getIntensity() > 1) {
+				c1.setBurning(true);
+				c2.setBurning(true);
+				map.put(position1, c1);
+				map.put(position2, c2);
+			} else {
+				c1.setBurning(true);
+				map.put(position1, c1);
+			}
+
+			System.out.println("Fire on position " + f.getPos() + " has propagated");
 		}
-		else if(f.getIntensity() < 4 && f.getIntensity() > 1){
-			c1.setBurning(true);
-			c2.setBurning(true);
-		}
-		else{
-			c1.setBurning(true);
-		}
+
 	}
 
 	public Map<String,Double> calculateClosestFighters (Position p){

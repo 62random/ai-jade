@@ -183,14 +183,14 @@ private class MoveAndNotify extends OneShotBehaviour {
 		Integer performative = 0;
 
 		if (destination.equals(((Fighter) myAgent).getPos())) {
-			performative = ACLMessage.PROPOSE;
+			performative = ACLMessage.CONFIRM;
 			block();
 		}
 		else {
 			Fighter me = ((Fighter) myAgent);
 			me.setAvailable(available);
 			Position p = me.getPos();
-			performative = ACLMessage.CONFIRM;
+			performative = ACLMessage.ACCEPT_PROPOSAL;
 
 			//substituir mais tarde o que está aqui no meio por comportamento inteligente
 			if(p.getX() < destination.getX() ) {
@@ -261,7 +261,7 @@ private class MoveToFire extends CyclicBehaviour{
             try{
                 Object contentObject = msg.getContentObject();
                 switch (msg.getPerformative()) {
-                    case(ACLMessage.REQUEST):
+                    case(ACLMessage.PROPOSE):
                         if(contentObject instanceof Fire){
                             Position destination = (((Fire) contentObject).getPos());
                             addBehaviour(new MoveAndNotify(destination,false));
