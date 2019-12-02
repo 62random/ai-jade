@@ -72,17 +72,33 @@ public class HeadQuarter extends Agent {
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
 							addBehaviour(new HandlerCheckCombatentes(map.getnBurningCells()));
 						}
+						break;
 					case(ACLMessage.CONFIRM):
 						if(contentObject instanceof Fighter) {
 							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
-							if (fInfo != null) {
+							if (fInfo != null && !((Fighter) contentObject).isAvailable()) {
 								fInfo.setPos(((Fighter) contentObject).getPos());
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
-								map.changeFighterData(fInfo.getAID(),fInfo);
+								map.changeFighterData(fInfo.getAID(), fInfo);
+								System.out.println("Agent " + fInfo.getAID() + " moved to " + fInfo.getPos());
 							}
 						}
-					/*case(ACLMessage.ACCEPT_PROPOSAL):
-							addBehaviour(new HandlerEnviaCombatente(myAgent,msg)); */
+						break;
+					case(ACLMessage.PROPOSE):
+						if(contentObject instanceof Fighter) {
+							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
+							if (fInfo != null) {
+								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
+								map.changeFighterData(fInfo.getAID(), fInfo);
+								for (Fire f : map.getFires().values()) {
+									if (f.getPos().equals(fInfo.getPos())) {
+										map.extinguishFire(f);
+									}
+								}
+								System.out.println("Fire on position " + fInfo.getPos() + " was extinguished");
+							}
+						}
+						break;
 				} 
 			}catch (UnreadableException e) {
 				// TODO Auto-generated catch block

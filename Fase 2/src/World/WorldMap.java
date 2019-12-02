@@ -93,6 +93,10 @@ public class WorldMap {
 		fighters.put(fname,f);
 	}
 
+	public void extinguishFire(Fire f){
+		fires.remove(f);
+	}
+
 	public WorldMap(int dim) {
 		this.map 		= new TreeMap<Position, Cell>(
 				new Comparator<Position>() {
