@@ -4,6 +4,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -94,11 +95,11 @@ public class Fighter extends Agent {
     }
     
     public void moveUp() {
-    	this.pos.setX(this.pos.getY() - 1);
+    	this.pos.setY(this.pos.getY() - 1);
     }
     
     public void moveDown() {
-    	this.pos.setX(this.pos.getY() + 1);
+    	this.pos.setY(this.pos.getY() + 1);
     }
     
     public void consumeFuel() {
@@ -166,7 +167,7 @@ private class NotifyOfExistence extends OneShotBehaviour{
     	}
     }
 
-private class MoveAndNotify extends OneShotBehaviour{
+private class MoveAndNotify extends OneShotBehaviour {
 	
 	private Position destination;
 	private Boolean available;
@@ -176,61 +177,73 @@ private class MoveAndNotify extends OneShotBehaviour{
 		this.destination = p;
 		this.available = availability;
 	}
-	
-	public void action(){
+
+	@Override
+	public void action() {
+		Integer performative = 0;
 
 		if (destination.equals(((Fighter) myAgent).getPos())) {
+			performative = ACLMessage.PROPOSE;
 			block();
 		}
 		else {
 			Fighter me = ((Fighter) myAgent);
 			me.setAvailable(available);
 			Position p = me.getPos();
-			
+			performative = ACLMessage.CONFIRM;
+
 			//substituir mais tarde o que está aqui no meio por comportamento inteligente
-			if(p.getX() > destination.getX() ) {
+			if(p.getX() < destination.getX() ) {
 				me.moveRight();
 			}
-			else if(p.getX() < destination.getX()) {
+			else if(p.getX() > destination.getX()) {
 				me.moveLeft();
 			}
-			else if(p.getY() > destination.getY()) {
+			else if(p.getY() < destination.getY()) {
 				me.moveDown();
 			}
 			else {
 				me.moveUp();
 			}
 			//substituir mais tarde o que está aqui no meio por comportamento inteligente
-			
+
 			me.consumeFuel();
-			
+
 			//TODO se passou num incêndio apaga-o
-		
+
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			me.addBehaviour(new MoveAndNotify(destination,available));
+
 		}
-		
+
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("HeadQuarter");
 		dfd.addServices(sd);
-		
+
 		DFAgentDescription[] results;
-		
+
 		try{
 			results = DFService.search(this.myAgent, dfd);
 			DFAgentDescription result = results[0];
-							
-			ACLMessage msg = new ACLMessage(ACLMessage.CONFIRM);
-			
+
+			ACLMessage msg = new ACLMessage(performative);
+
 			AID quartel = result.getName();
 			msg.addReceiver(quartel);
-			
+
 			try{
 				msg.setContentObject(this.myAgent);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			send(msg);
-			
+
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}

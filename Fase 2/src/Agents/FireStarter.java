@@ -77,9 +77,9 @@ public class FireStarter extends Agent {
 				}
 				send(msg);
 				
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
+				} catch (FIPAException e) {
+					e.printStackTrace();
+				}
 
 			myAgent.doDelete();
     	}
