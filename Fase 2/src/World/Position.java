@@ -28,6 +28,11 @@ public class Position implements Serializable{
 		this.x = x;
 		this.y = y;
 	}
+
+	public Position(Position p) {
+		this.x = p.x;
+		this.y = p.y;
+	}
 	
 	public boolean equals(Object o) {
 		if (o == this) return true;
@@ -47,4 +52,8 @@ public class Position implements Serializable{
 
 		return  Math.hypot(ac,cb);
 	}
+
+    public boolean coordsEqual(int i, int j) {
+		return x==i && y==j;
+    }
 }

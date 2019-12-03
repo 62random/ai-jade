@@ -1,5 +1,7 @@
 package Main;
 
+import Graphics.Configs;
+import Graphics.Window;
 import World.WorldMap;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -12,6 +14,7 @@ public class MainContainer {
 	
 	Runtime rt;
 	ContainerController container;
+	Window window;
 
 	public ContainerController initContainerInPlatform(String host, String port, String containerName) {
 		// Get the JADE runtime interface (singleton)
@@ -58,12 +61,13 @@ public class MainContainer {
 	
 	public static void main(String[] args) {
 		MainContainer a 	= new MainContainer();
-		WorldMap map 		= new WorldMap(200);
+		WorldMap map 		= new WorldMap(Configs.MAP_SIZE);
 		Object[] objs 		= new Object[1];
 		objs[0] = map;
 		
 		a.initMainContainerInPlatform("localhost", "9888", "MainContainer");		
 		ContainerController c = a.initContainerInPlatform("localhost", "9888", "World Container");
+
 		
 		try {
 			AgentController ag = c.createNewAgent("HeadQuarter", "Agents.HeadQuarter", objs);// arguments
@@ -112,7 +116,12 @@ public class MainContainer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-		
+
+		a.window = new Window(map);
+        Thread t = new Thread(a.window);
+        t.start();
+
+
 		int numFire = 0;
 		while(numFire < 1000) {
 			AgentController ag;

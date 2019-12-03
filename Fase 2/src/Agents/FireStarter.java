@@ -34,7 +34,7 @@ public class FireStarter extends Agent {
 	public void setIntensity(int intensity) {
 		this.intensity = intensity;
 	}
-	
+
 	protected void setup() {
 		super.setup();
 		addBehaviour(new FireNotification());

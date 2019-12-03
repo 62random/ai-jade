@@ -8,7 +8,7 @@ public class Fire implements Serializable {
     private int         intensity;
 
     public Fire (Position pos, int intensity){
-        this.pos = pos;
+        this.pos = new Position(pos);
         this.intensity = intensity;
     }
 

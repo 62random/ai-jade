@@ -94,16 +94,17 @@ public class Fighter extends Agent {
     }
     
     public void moveUp() {
-    	this.pos.setX(this.pos.getY() - 1);
+    	this.pos.setY(this.pos.getY() - 1);
     }
     
     public void moveDown() {
-    	this.pos.setX(this.pos.getY() + 1);
+    	this.pos.setY(this.pos.getY() + 1);
     }
     
     public void consumeFuel() {
     	this.currentFuel--;
     }
+
 
     protected void setup() {
 		super.setup();
@@ -166,7 +167,7 @@ private class NotifyOfExistence extends OneShotBehaviour{
     }
 
 private class MoveAndNotify extends OneShotBehaviour{
-	
+
 	private Position destination;
 	private Boolean available;
 	
@@ -187,13 +188,13 @@ private class MoveAndNotify extends OneShotBehaviour{
 			Position p = me.getPos();
 			
 			//substituir mais tarde o que está aqui no meio por comportamento inteligente
-			if(p.getX() > destination.getX() ) {
+			if(p.getX() < destination.getX() ) {
 				me.moveRight();
 			}
-			else if(p.getX() < destination.getX()) {
+			else if(p.getX() > destination.getX()) {
 				me.moveLeft();
 			}
-			else if(p.getY() > destination.getY()) {
+			else if(p.getY() < destination.getY()) {
 				me.moveDown();
 			}
 			else {
@@ -204,9 +205,15 @@ private class MoveAndNotify extends OneShotBehaviour{
 			me.consumeFuel();
 			
 			//TODO se passou num incêndio apaga-o
-		
+			try {
+				Thread.sleep(300/speed());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			me.addBehaviour(new MoveAndNotify(destination, available));
+
 		}
-		
+
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("HeadQuarter");
@@ -236,7 +243,18 @@ private class MoveAndNotify extends OneShotBehaviour{
 	}
 }
 
-private class MoveToFire extends CyclicBehaviour{
+	private int speed() {
+		if(this instanceof Drone)
+			return 2;
+		if(this instanceof Aircraft)
+			return 5;
+		if(this instanceof Truck)
+			return 1;
+
+		return 1;
+	}
+
+	private class MoveToFire extends CyclicBehaviour{
 
         public void action(){
 

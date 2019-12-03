@@ -6,6 +6,7 @@ public class Cell {
 	private boolean 	water;
 	private boolean 	fuel;
 	private boolean		burning;
+	private WorldMap	world;
 	
 	
 	public Position getPos() {
@@ -32,12 +33,14 @@ public class Cell {
 	public void setBurning(boolean burning) {
 		this.burning = burning;
 	}
+
 	
-	public Cell(Position pos, boolean water, boolean fuel) {
+	public Cell(WorldMap world, Position pos, boolean water, boolean fuel) {
 		this.pos = pos;
 		this.water = water;
 		this.fuel = fuel;
 		this.burning = false;
+		this.world = world;
 	}
 	
 }

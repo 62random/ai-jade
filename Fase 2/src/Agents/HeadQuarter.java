@@ -60,7 +60,7 @@ public class HeadQuarter extends Agent {
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
 						if(contentObject instanceof Fighter) {
-							FighterInfo fInfo = new FighterInfo(((Fighter) contentObject).getName(),((Fighter) contentObject).getPos(),((Fighter) contentObject).isAvailable());
+							FighterInfo fInfo = new FighterInfo((Fighter) contentObject);
 							map.addFighter(fInfo);
 							System.out.println("Added agent " + ((Fighter) contentObject).getName());
 						}
@@ -79,8 +79,12 @@ public class HeadQuarter extends Agent {
 								fInfo.setPos(((Fighter) contentObject).getPos());
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(),fInfo);
+								System.out.println("Agente " + fInfo.getAID() + " moveu-se para " + fInfo.getPos());
 							}
+
+
 						}
+
 					/*case(ACLMessage.ACCEPT_PROPOSAL):
 							addBehaviour(new HandlerEnviaCombatente(myAgent,msg)); */
 				} 

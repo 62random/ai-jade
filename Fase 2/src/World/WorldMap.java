@@ -1,7 +1,6 @@
 package World;
-import Agents.Fighter;
-import javafx.geometry.Pos;
-import sun.reflect.generics.tree.Tree;
+
+import Graphics.Configs;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,7 +39,7 @@ public class WorldMap {
 	}
 	
 	public void addFighter(FighterInfo f) {
-		fighters.put(f.getAID().toString(), f);
+		fighters.put(f.getAID(), f);
 	}
 	
 	public List<FighterInfo> fightersAtPosition(Position p) {
@@ -70,7 +69,6 @@ public class WorldMap {
 	public void changeCellStatus (Position p, boolean burning){
 		Cell c = map.get(p);
 		c.setBurning(burning);
-		map.put(p,c);
 	}
 
 	public Map<String,Double> calculateClosestFighters (Position p){
@@ -98,7 +96,15 @@ public class WorldMap {
 				new Comparator<Position>() {
 	                @Override
 	                public int compare(Position p1, Position p2) {
-	                    return (p1.getX() + p1.getY()) - (p2.getX() + p2.getY());
+	                    int dx = p1.getX() - p2.getX(), dy = p1.getY() - p2.getY();
+	                    if(dx == 0) {
+							if (dy == 0)
+								return 0;
+							else
+								return dy;
+						}
+	                    else
+	                    	return dx;
 	                }
 	            });
 
@@ -109,23 +115,53 @@ public class WorldMap {
 		Position pos;
 		Cell c;
 		Random r = new Random();
-		boolean water, fuel;
 		int tmp;
 		
 		for(int i = 0; i < dimension; i++)
 			for(int j = 0; j < dimension; j++) {
 				pos = new Position(i, j);
+
 				tmp = r.nextInt(100);
-				if(tmp < 1)
-					c = new Cell(pos, true, true); 	//Water and fuel
-				else if(tmp < 3)
-					c = new Cell(pos, true, false); //Just water
-				else if(tmp < 5)
-					c = new Cell(pos, false, true); //Just fuel
-				else				
-					c = new Cell(pos, false, false); //Nothing
-				
+				if(tmp < 3) {
+					c = new Cell(this, pos, true, true);    //Water and fuel
+				}
+				else if(tmp < 6) {
+					c = new Cell(this, pos, true, false); //Just water
+				}
+				else if(tmp < 9) {
+					c = new Cell(this, pos, false, true); //Just fuel
+				}
+				else {
+					c = new Cell(this, pos, false, false); //Nothing
+				}
+
 				map.put(pos, c);
 			}
+	}
+
+	public ArrayList<Integer> agentsOn(int i, int j) {
+		ArrayList<Integer> list = new ArrayList<>();
+		for(FighterInfo f : fighters.values())
+			if(f.isAt(i,j))
+				list.add(f.getType());
+
+		return list;
+	}
+
+	public ArrayList<Integer> cellPropertiesOn(int i, int j) {
+		ArrayList<Integer> list = new ArrayList<>();
+		Position p = new Position(i,j);
+		Cell c = map.get(p);
+
+		if(c.isFuel())
+			list.add(Configs.CELL_FUEL);
+
+		if(c.isWater())
+			list.add(Configs.CELL_WATER);
+
+		if(c.isBurning())
+			list.add(Configs.CELL_FIRE);
+
+		return list;
 	}
 }
