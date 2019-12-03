@@ -60,7 +60,7 @@ public class HeadQuarter extends Agent {
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
 						if(contentObject instanceof Fighter) {
-							FighterInfo fInfo = new FighterInfo((Fighter) contentObject);
+							FighterInfo fInfo = new FighterInfo(((Fighter) contentObject).getName(),((Fighter) contentObject).getPos(),((Fighter) contentObject).isAvailable());
 							map.addFighter(fInfo);
 							System.out.println("Added agent " + ((Fighter) contentObject).getName());
 						}
@@ -72,21 +72,30 @@ public class HeadQuarter extends Agent {
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
 							addBehaviour(new HandlerCheckCombatentes(map.getnBurningCells()));
 						}
+						break;
+					case(ACLMessage.ACCEPT_PROPOSAL):
+						if(contentObject instanceof Fighter) {
+							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
+							if (fInfo != null && !((Fighter) contentObject).isAvailable()) {
+								fInfo.setPos(((Fighter) contentObject).getPos());
+								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
+								map.changeFighterData(fInfo.getAID(), fInfo);
+							}
+						}
+						break;
 					case(ACLMessage.CONFIRM):
 						if(contentObject instanceof Fighter) {
 							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
 							if (fInfo != null) {
 								fInfo.setPos(((Fighter) contentObject).getPos());
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
-								map.changeFighterData(fInfo.getAID(),fInfo);
-								System.out.println("Agente " + fInfo.getAID() + " moveu-se para " + fInfo.getPos());
+								map.changeFighterData(fInfo.getAID(), fInfo);
+								map.changeCellStatus(fInfo.getPos(),false);
+								map.extinguishFire(fInfo.getPos());
+								System.out.println("Fire on position " + fInfo.getPos() + " was extinguished");
 							}
-
-
 						}
-
-					/*case(ACLMessage.ACCEPT_PROPOSAL):
-							addBehaviour(new HandlerEnviaCombatente(myAgent,msg)); */
+						break;
 				} 
 			}catch (UnreadableException e) {
 				// TODO Auto-generated catch block
@@ -133,7 +142,7 @@ public class HeadQuarter extends Agent {
 					}
 
 					System.out.println("Requesting help from fighter: " + provider.getName());
-					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 					msg.addReceiver(provider);
 
 					try{

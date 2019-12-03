@@ -132,14 +132,15 @@ public class MainContainer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}// arguments
-			
+
 			try {
 				Thread.sleep(7000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
+			map.propagateFire();
 		}
 		
 

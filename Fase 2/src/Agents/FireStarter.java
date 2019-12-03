@@ -44,6 +44,8 @@ public class FireStarter extends Agent {
 		WorldMap map = (WorldMap) getArguments()[0];
 		
 		pos = new Position(r.nextInt(map.getDimension()), r.nextInt(map.getDimension()));
+
+		intensity = r.nextInt(6);
 	}
     
     // Classe que permite informar inc�ndios ao Quartel
@@ -77,9 +79,9 @@ public class FireStarter extends Agent {
 				}
 				send(msg);
 				
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
+				} catch (FIPAException e) {
+					e.printStackTrace();
+				}
 
 			myAgent.doDelete();
     	}

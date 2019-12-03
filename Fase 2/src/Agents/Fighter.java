@@ -4,6 +4,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -12,6 +13,7 @@ import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 
 import World.Position;
 import World.*;
@@ -105,6 +107,10 @@ public class Fighter extends Agent {
     	this.currentFuel--;
     }
 
+    public void consumeWater() {this.currentWater--; }
+
+    public boolean checkResources() { return true; }
+
 
     protected void setup() {
 		super.setup();
@@ -166,28 +172,64 @@ private class NotifyOfExistence extends OneShotBehaviour{
     	}
     }
 
-private class MoveAndNotify extends OneShotBehaviour{
-
+private class MoveAndNotify extends OneShotBehaviour {
+	
 	private Position destination;
 	private Boolean available;
 	
-	public MoveAndNotify(Position p,boolean availability) {
+	public MoveAndNotify(Position p) {
 		super();
 		this.destination = p;
-		this.available = availability;
 	}
-	
-	public void action(){
 
-		if (destination.equals(((Fighter) myAgent).getPos())) {
-			block();
+	@Override
+	public void action() {
+		Integer performative = 0;
+		Fighter me = ((Fighter) myAgent);
+		Position p = me.getPos();
+		WorldMap map = (WorldMap) getArguments()[0];
+		Cell c = map.getMap().get(p);
+
+		if (destination.equals(me.getPos())) {
+			me.consumeWater();
+			if(map.getMap().get(p.getAdjacentDown(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentDown(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else if(map.getMap().get(p.getAdjacentUp(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentUp(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else if(map.getMap().get(p.getAdjacentLeft(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentLeft(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else if(map.getMap().get(p.getAdjacentRight(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentRight(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else {
+				me.setAvailable(true);
+			}
+			performative = ACLMessage.CONFIRM;
+		}
+		else if(c.isBurning() && me.getCurrentWater()>1) {
+			me.consumeWater();
+			performative = ACLMessage.CONFIRM;
+			me.addBehaviour(new MoveAndNotify(destination));
+		}
+		else if(c.isFuel() && me.getCurrentFuel() != me.getFuelCapacity()) {
+			me.setCurrentFuel(getFuelCapacity());
+			performative = ACLMessage.ACCEPT_PROPOSAL;
+			me.addBehaviour(new MoveAndNotify(destination));
+			System.out.println("Agent " + me.getName() + " refilled fuel!");
+		}
+		else if(c.isWater() && me.getCurrentWater() != me.getWaterCapacity()) {
+			me.setCurrentWater(getWaterCapacity());
+			performative = ACLMessage.ACCEPT_PROPOSAL;
+			me.addBehaviour(new MoveAndNotify(destination));
+			System.out.println("Agent " + me.getName() + " refilled water!");
 		}
 		else {
-			Fighter me = ((Fighter) myAgent);
-			me.setAvailable(available);
-			Position p = me.getPos();
-			
-			//substituir mais tarde o que está aqui no meio por comportamento inteligente
+			me.setAvailable(false);
+			performative = ACLMessage.ACCEPT_PROPOSAL;
+
 			if(p.getX() < destination.getX() ) {
 				me.moveRight();
 			}
@@ -201,16 +243,22 @@ private class MoveAndNotify extends OneShotBehaviour{
 				me.moveUp();
 			}
 			//substituir mais tarde o que está aqui no meio por comportamento inteligente
-			
+
 			me.consumeFuel();
-			
+
+			System.out.println("Agent " + me.getName() + " moved to " + me.getPos());
+
 			//TODO se passou num incêndio apaga-o
+
+			int speed = 500/me.getSpeed();
+
 			try {
-				Thread.sleep(300/speed());
+				Thread.sleep(speed);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			me.addBehaviour(new MoveAndNotify(destination, available));
+
+			me.addBehaviour(new MoveAndNotify(destination));
 
 		}
 
@@ -218,25 +266,25 @@ private class MoveAndNotify extends OneShotBehaviour{
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("HeadQuarter");
 		dfd.addServices(sd);
-		
+
 		DFAgentDescription[] results;
-		
+
 		try{
 			results = DFService.search(this.myAgent, dfd);
 			DFAgentDescription result = results[0];
-							
-			ACLMessage msg = new ACLMessage(ACLMessage.CONFIRM);
-			
+
+			ACLMessage msg = new ACLMessage(performative);
+
 			AID quartel = result.getName();
 			msg.addReceiver(quartel);
-			
+
 			try{
 				msg.setContentObject(this.myAgent);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			send(msg);
-			
+
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
@@ -265,10 +313,10 @@ private class MoveAndNotify extends OneShotBehaviour{
             try{
                 Object contentObject = msg.getContentObject();
                 switch (msg.getPerformative()) {
-                    case(ACLMessage.REQUEST):
+                    case(ACLMessage.PROPOSE):
                         if(contentObject instanceof Fire){
                             Position destination = (((Fire) contentObject).getPos());
-                            addBehaviour(new MoveAndNotify(destination,false));
+                            addBehaviour(new MoveAndNotify(destination));
                         }
                 }
             } catch (UnreadableException e) {

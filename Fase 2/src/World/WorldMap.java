@@ -1,11 +1,14 @@
 package World;
+import Agents.Fighter;
+import javafx.geometry.Pos;
 
 import Graphics.Configs;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WorldMap {
+public class WorldMap implements Serializable {
 	
 	private Map<Position, Cell> 	map;
 	private int 					dimension;
@@ -69,6 +72,51 @@ public class WorldMap {
 	public void changeCellStatus (Position p, boolean burning){
 		Cell c = map.get(p);
 		c.setBurning(burning);
+		map.put(p,c);
+	}
+
+	public void propagateFire(){
+
+		if(fires.size()>0) {
+
+			Random generator = new Random();
+			Object[] values = fires.values().toArray();
+			Fire f = (Fire) values[generator.nextInt(values.length)];
+
+			Position p = f.getPos();
+
+			Position position1 = p.getAdjacentRight(p);
+			Position position2 = p.getAdjacentLeft(p);
+			Position position3 = p.getAdjacentDown(p);
+			Position position4 = p.getAdjacentUp(p);
+
+			Cell c1 = map.get(position1);
+			Cell c2 = map.get(position2);
+			Cell c3 = map.get(position3);
+			Cell c4 = map.get(position4);
+
+			if (f.getIntensity() > 4) {
+				c1.setBurning(true);
+				c2.setBurning(true);
+				c3.setBurning(true);
+				c4.setBurning(true);
+				map.put(position1, c1);
+				map.put(position2, c2);
+				map.put(position3, c3);
+				map.put(position4, c4);
+			} else if (f.getIntensity() < 4 && f.getIntensity() > 1) {
+				c1.setBurning(true);
+				c2.setBurning(true);
+				map.put(position1, c1);
+				map.put(position2, c2);
+			} else {
+				c1.setBurning(true);
+				map.put(position1, c1);
+			}
+
+			System.out.println("Fire on position " + f.getPos() + " has propagated");
+		}
+
 	}
 
 	public Map<String,Double> calculateClosestFighters (Position p){
@@ -89,6 +137,21 @@ public class WorldMap {
 
 	public void changeFighterData(String fname,FighterInfo f){
 		fighters.put(fname,f);
+	}
+
+	public void extinguishFire(Position pos){
+		Integer removalKey = null;
+
+		for (Map.Entry<Integer,Fire> entry: fires.entrySet()) {
+			if(entry.getValue().getPos().equals(pos)){
+				removalKey = entry.getKey();
+				break;
+			}
+		}
+
+		if(removalKey != null) {
+			fires.remove(removalKey);
+		}
 	}
 
 	public WorldMap(int dim) {
@@ -115,6 +178,7 @@ public class WorldMap {
 		Position pos;
 		Cell c;
 		Random r = new Random();
+		boolean water, fuel;
 		int tmp;
 		
 		for(int i = 0; i < dimension; i++)

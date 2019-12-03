@@ -7,13 +7,11 @@ public class Aircraft extends Fighter {
     protected void setup() {
 		super.setup();
 
-		this.setSpeed(2);
+		this.setSpeed(1);
 		this.setWaterCapacity(15);
 		this.setFuelCapacity(20);
 		this.setCurrentFuel(this.getFuelCapacity());
 		this.setCurrentWater(this.getWaterCapacity());
-		
-		//exemplo da ficha da loja
-		//addBehaviour(new Comprarproduto()); // fazer a compra de um produto
+
 	}
 }
