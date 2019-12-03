@@ -1,7 +1,4 @@
 package World;
-import Agents.Fighter;
-import javafx.geometry.Pos;
-
 import Graphics.Configs;
 
 import java.io.Serializable;
@@ -178,7 +175,7 @@ public class WorldMap implements Serializable {
 		Position pos;
 		Cell c;
 		Random r = new Random();
-		boolean water, fuel;
+
 		int tmp;
 		
 		for(int i = 0; i < dimension; i++)

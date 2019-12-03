@@ -60,7 +60,7 @@ public class HeadQuarter extends Agent {
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
 						if(contentObject instanceof Fighter) {
-							FighterInfo fInfo = new FighterInfo(((Fighter) contentObject).getName(),((Fighter) contentObject).getPos(),((Fighter) contentObject).isAvailable());
+							FighterInfo fInfo = new FighterInfo(((Fighter) contentObject));
 							map.addFighter(fInfo);
 							System.out.println("Added agent " + ((Fighter) contentObject).getName());
 						}

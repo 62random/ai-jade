@@ -291,17 +291,6 @@ private class MoveAndNotify extends OneShotBehaviour {
 	}
 }
 
-	private int speed() {
-		if(this instanceof Drone)
-			return 2;
-		if(this instanceof Aircraft)
-			return 5;
-		if(this instanceof Truck)
-			return 1;
-
-		return 1;
-	}
-
 	private class MoveToFire extends CyclicBehaviour{
 
         public void action(){
