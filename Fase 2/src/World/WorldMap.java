@@ -2,10 +2,11 @@ package World;
 import Agents.Fighter;
 import javafx.geometry.Pos;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WorldMap {
+public class WorldMap implements Serializable {
 	
 	private Map<Position, Cell> 	map;
 	private int 					dimension;

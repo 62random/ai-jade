@@ -80,7 +80,6 @@ public class HeadQuarter extends Agent {
 								fInfo.setPos(((Fighter) contentObject).getPos());
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(), fInfo);
-								System.out.println("Agent " + fInfo.getAID() + " moved to " + fInfo.getPos());
 							}
 						}
 						break;
@@ -90,6 +89,7 @@ public class HeadQuarter extends Agent {
 							if (fInfo != null) {
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(), fInfo);
+								map.changeCellStatus(fInfo.getPos(),false);
 								map.extinguishFire(fInfo.getPos());
 								System.out.println("Fire on position " + fInfo.getPos() + " was extinguished");
 							}

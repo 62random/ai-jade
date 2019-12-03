@@ -64,26 +64,38 @@ public class Position implements Serializable{
 	}
 
 	public Position getAdjacentLeft(Position p){
-		Position position = new Position(p.getX(), p.getY());
-		position.setX(p.getX()-1);
-		return position;
+		if(p.getX()!=1) {
+			Position position = new Position(p.getX(), p.getY());
+			position.setX(p.getX() - 1);
+			return position;
+		}
+		else return p;
 	}
 
 	public Position getAdjacentRight(Position p){
-		Position position = new Position(p.getX(), p.getY());
-		position.setX(p.getX()+1);
-		return position;
+		if(p.getX()!=199) {
+			Position position = new Position(p.getX(), p.getY());
+			position.setX(p.getX() + 1);
+			return position;
+		}
+		else return p;
 	}
 
 	public Position getAdjacentUp(Position p){
-		Position position = new Position(p.getX(), p.getY());
-		position.setX(p.getY()+1);
-		return position;
+		if(p.getY()!=199) {
+			Position position = new Position(p.getX(), p.getY());
+			position.setX(p.getY() + 1);
+			return position;
+		}
+		else return p;
 	}
 
 	public Position getAdjacentDown(Position p){
-		Position position = new Position(p.getX(), p.getY());
-		position.setX(p.getY()-1);
-		return position;
+		if(p.getY()!=1) {
+			Position position = new Position(p.getX(), p.getY());
+			position.setX(p.getY() - 1);
+			return position;
+		}
+		else return p;
 	}
 }

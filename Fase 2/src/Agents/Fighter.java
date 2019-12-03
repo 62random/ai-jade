@@ -107,6 +107,8 @@ public class Fighter extends Agent {
     }
 
     public void consumeWater() {this.currentWater--; }
+
+    public boolean checkResources() { return true; }
     
 
     protected void setup() {
@@ -182,17 +184,50 @@ private class MoveAndNotify extends OneShotBehaviour {
 	public void action() {
 		Integer performative = 0;
 		Fighter me = ((Fighter) myAgent);
+		Position p = me.getPos();
+		WorldMap map = (WorldMap) getArguments()[0];
+		Cell c = map.getMap().get(p);
 
 		if (destination.equals(me.getPos())) {
 			me.consumeWater();
+			if(map.getMap().get(p.getAdjacentDown(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentDown(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else if(map.getMap().get(p.getAdjacentUp(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentUp(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else if(map.getMap().get(p.getAdjacentLeft(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentLeft(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else if(map.getMap().get(p.getAdjacentRight(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
+				destination = p.getAdjacentRight(p);
+				me.addBehaviour(new MoveAndNotify(destination));
+			} else {
+				me.setAvailable(true);
+			}
 			performative = ACLMessage.CONFIRM;
+		}
+		else if(c.isBurning() && me.getCurrentWater()>1) {
+			me.consumeWater();
+			performative = ACLMessage.CONFIRM;
+			me.addBehaviour(new MoveAndNotify(destination));
+		}
+		else if(c.isFuel() && me.getCurrentFuel() != me.getFuelCapacity()) {
+			me.setCurrentFuel(getFuelCapacity());
+			performative = ACLMessage.ACCEPT_PROPOSAL;
+			me.addBehaviour(new MoveAndNotify(destination));
+			System.out.println("Agent " + me.getName() + " refilled fuel!");
+		}
+		else if(c.isWater() && me.getCurrentWater() != me.getWaterCapacity()) {
+			me.setCurrentWater(getWaterCapacity());
+			performative = ACLMessage.ACCEPT_PROPOSAL;
+			me.addBehaviour(new MoveAndNotify(destination));
+			System.out.println("Agent " + me.getName() + " refilled water!");
 		}
 		else {
 			me.setAvailable(false);
-			Position p = me.getPos();
 			performative = ACLMessage.ACCEPT_PROPOSAL;
 
-			//substituir mais tarde o que está aqui no meio por comportamento inteligente
 			if(p.getX() < destination.getX() ) {
 				me.moveRight();
 			}
@@ -209,10 +244,14 @@ private class MoveAndNotify extends OneShotBehaviour {
 
 			me.consumeFuel();
 
+			System.out.println("Agent " + me.getName() + " moved to " + me.getPos());
+
 			//TODO se passou num incêndio apaga-o
 
+			int speed = 500/me.getSpeed();
+
 			try {
-				Thread.sleep(100);
+				Thread.sleep(speed);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
