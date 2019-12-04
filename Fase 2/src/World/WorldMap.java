@@ -1,5 +1,6 @@
 package World;
 import Graphics.Configs;
+import javafx.geometry.Pos;
 
 import java.io.Serializable;
 import java.util.*;
@@ -10,7 +11,7 @@ public class WorldMap implements Serializable {
 	private Map<Position, Cell> 	map;
 	private int 					dimension;
 	private Map<String,FighterInfo> fighters;
-	private Map<String, Cell> 		resources;
+	private Map<Position, Cell> 		resources;
 	private Map<Integer,Fire> 		fires;
 	private int						nBurningCells = 0;
 	
@@ -68,11 +69,11 @@ public class WorldMap implements Serializable {
 	}
 
 
-	public Map<String, Cell> getResources() {
+	public Map<Position, Cell> getResources() {
 		return resources;
 	}
 
-	public void setResources(Map<String, Cell> resources) {
+	public void setResources(Map<Position, Cell> resources) {
 		this.resources = resources;
 	}
 
@@ -139,6 +140,25 @@ public class WorldMap implements Serializable {
 						.sorted((Map.Entry.<String,Double>comparingByValue()))
 						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2) -> e1, LinkedHashMap::new));
 
+		System.out.println(sortedByDistance.toString());
+
+		return  sortedByDistance;
+	}
+
+	public Map<Position,Double> calculateClosestResources(Position p){
+		Map<Position,Double> distResourcesMap = new HashMap<>();
+
+		for (Position resourceID: resources.keySet()) {
+
+			double distance = p.distanceBetweenTwoPositions(resources.get(resourceID).getPos());
+			distResourcesMap.put(resourceID, distance);
+		}
+
+		final Map<Position, Double> sortedByDistance = distResourcesMap.entrySet()
+				.stream()
+				.sorted((Map.Entry.<Position,Double>comparingByValue()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
 		return  sortedByDistance;
 	}
 
@@ -185,6 +205,7 @@ public class WorldMap implements Serializable {
 
 		this.dimension 	= dim;
 		this.fighters 	= new HashMap<String, FighterInfo>();
+		this.resources = new HashMap<Position,Cell>();
 		this.fires 		= new HashMap<Integer, Fire>();
 		
 		Position pos;
@@ -200,12 +221,15 @@ public class WorldMap implements Serializable {
 				tmp = r.nextInt(100);
 				if(tmp < Configs.PERCENT_FUEL_WATER) {
 					c = new Cell(this, pos, true, true);    //Water and fuel
+					resources.put(pos,c);
 				}
 				else if(tmp < Configs.PERCENT_FUEL_WATER + Configs.PERCENT_WATER) {
 					c = new Cell(this, pos, true, false); //Just water
+					resources.put(pos,c);
 				}
 				else if(tmp < Configs.PERCENT_FUEL_WATER + Configs.PERCENT_WATER + Configs.PERCENT_FUEL) {
 					c = new Cell(this, pos, false, true); //Just fuel
+					resources.put(pos,c);
 				}
 				else {
 					c = new Cell(this, pos, false, false); //Nothing

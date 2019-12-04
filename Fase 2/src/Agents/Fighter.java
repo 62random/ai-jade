@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import World.Position;
 import World.*;
 import jade.lang.acl.UnreadableException;
+import javafx.geometry.Pos;
 
 public class Fighter extends Agent {
 
@@ -91,6 +92,26 @@ public class Fighter extends Agent {
 		this.currentWater = currentWater;
 	}
 
+	public void moveUpRight() {
+    	this.pos.setX(this.pos.getX() + 1);
+    	this.pos.setY(this.pos.getY() - 1);
+	}
+
+	public void moveUpLeft() {
+    	this.pos.setX(this.pos.getX() - 1);
+		this.pos.setY(this.pos.getY() - 1);
+	}
+
+	public void moveDownLeft() {
+		this.pos.setX(this.pos.getX() - 1);
+		this.pos.setY(this.pos.getY() + 1);
+	}
+
+	public void moveDownRight(){
+		this.pos.setX(this.pos.getX() + 1);
+		this.pos.setY(this.pos.getY() + 1);
+	}
+
 	public void moveRight() {
     	this.pos.setX(this.pos.getX() + 1);
     }
@@ -115,7 +136,7 @@ public class Fighter extends Agent {
 
 
 
-	public boolean checkResources(Fire f) {
+	public boolean checkResources(WorldMap map, Fire f) {
 
     	int water = getCurrentWater();
     	int fuel = getCurrentFuel();
@@ -123,12 +144,12 @@ public class Fighter extends Agent {
 
     	Double d = p.distanceBetweenTwoPositions(this.pos);
 
-    	Map<String, Cell> res = map.getResources();
-    	Map<String, Double> closestResources = calculateClosestResources(p);
-    	String chosenResource = null;
+    	Map<Position, Cell> res = map.getResources();
+    	Map<Position, Double> closestResources = map.calculateClosestResources(p);
+    	Position chosenResource = null;
 
 		while(chosenResource == null){
-			for(String resource : closestResources.keySet()){
+			for(Position resource : closestResources.keySet()){
 				if(res.get(resource).isFuel()){
 					chosenResource = resource;
 					break;
@@ -136,7 +157,7 @@ public class Fighter extends Agent {
 			}
 		}
 		Cell c = res.get(chosenResource);
-		double distance = p.distanceBetweenTwoPositions(c.getPos());
+		double distance = p.distanceBetweenTwoPositions(chosenResource);
 
 		//vê também se, para além de conseguir lá chegar, consegue chegar a outros postos de abastecimento depois de apagar o fogo
     	if(d + distance < fuel && water > f.getIntensity()){
@@ -145,26 +166,6 @@ public class Fighter extends Agent {
 
     	return false;
     }
-
-	public Map<String,Double> calculateClosestResources(Position p){
-		Map<String,Double> distResourcesMap = new HashMap<>();
-		Map<String, Cell> resources = map.getResources();
-
-		for (String resourceID: resources.keySet()) {
-
-			double distance = p.distanceBetweenTwoPositions(resources.get(resourceID).getPos());
-			distResourcesMap.put(resourceID, distance);
-		}
-
-		final Map<String, Double> sortedByDistance = distResourcesMap.entrySet()
-				.stream()
-				.sorted((Map.Entry.<String,Double>comparingByValue()))
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-
-		return  sortedByDistance;
-	}
-
-
 
 
     protected void setup() {
@@ -245,7 +246,7 @@ private class MoveAndNotify extends OneShotBehaviour {
 		WorldMap map = (WorldMap) getArguments()[0];
 		Cell c = map.getMap().get(p);
 
-		if (destination.equals(me.getPos())) {
+		if (me.getPos().equals(destination)) {
 			me.consumeWater();
 			if(map.getMap().get(p.getAdjacentDown(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
 				destination = p.getAdjacentDown(p);
@@ -285,7 +286,19 @@ private class MoveAndNotify extends OneShotBehaviour {
 			me.setAvailable(false);
 			performative = ACLMessage.ACCEPT_PROPOSAL;
 
-			if(p.getX() < destination.getX() ) {
+			if(p.getX() < destination.getX() && p.getY() < destination.getY()){
+				me.moveDownRight();
+			}
+			else if(p.getX() < destination.getX() && p.getY() > destination.getY()) {
+				me.moveUpRight();
+			}
+			else if(p.getX() > destination.getX() && p.getY() > destination.getY()) {
+				me.moveUpLeft();
+			}
+			else if(p.getX() > destination.getX() && p.getY() < destination.getY()) {
+				me.moveDownLeft();
+			}
+			else if(p.getX() < destination.getX()) {
 				me.moveRight();
 			}
 			else if(p.getX() > destination.getX()) {
@@ -305,7 +318,7 @@ private class MoveAndNotify extends OneShotBehaviour {
 
 			//TODO se passou num incêndio apaga-o
 
-			int speed = 500/me.getSpeed();
+			int speed = 2000/me.getSpeed();
 
 			try {
 				Thread.sleep(speed);

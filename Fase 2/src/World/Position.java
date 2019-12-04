@@ -1,5 +1,8 @@
 package World;
 
+import Graphics.Configs;
+import sun.security.krb5.Config;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +52,36 @@ public class Position implements Serializable{
 	}
 
 	public double distanceBetweenTwoPositions(Position p2){
-		double ac = Math.abs(p2.getY() - this.x);
-		double cb = Math.abs(p2.getX() - this.y);
 
-		return  Math.hypot(ac,cb);
+		int distance = 0;
+		int x1 = this.getX();
+		int y1 = this.getY();
+
+		while(!(x1 == p2.getX() && y1 == p2.getY())) {
+			if (x1 < p2.getX() && y1 < p2.getY()) {
+				x1++;
+				y1++;
+			} else if (x1 < p2.getX() && y1 > p2.getY()) {
+				x1++;
+				y1--;
+			} else if (x1 > p2.getX() && y1 > p2.getY()) {
+				x1--;
+				y1--;
+			} else if (x1 > p2.getX() && y1 < p2.getY()) {
+				x1--;
+				y1++;
+			} else if (x1 < p2.getX()) {
+				x1++;
+			} else if (x1 > p2.getX()) {
+				x1--;
+			} else if (y1 < p2.getY()) {
+				y1++;
+			} else {
+				y1--;
+			}
+			distance++;
+		}
+		return  distance;
 	}
 
 	public boolean isAdjacent(Position p2){
@@ -78,7 +107,7 @@ public class Position implements Serializable{
 	}
 
 	public Position getAdjacentRight(Position p){
-		if(p.getX()!=199) {
+		if(p.getX()!= Configs.MAP_SIZE) {
 			Position position = new Position(p.getX(), p.getY());
 			position.setX(p.getX() + 1);
 			return position;
@@ -87,18 +116,18 @@ public class Position implements Serializable{
 	}
 
 	public Position getAdjacentUp(Position p){
-		if(p.getY()!=199) {
+		if(p.getY()!=0) {
 			Position position = new Position(p.getX(), p.getY());
-			position.setX(p.getY() + 1);
+			position.setX(p.getY() - 1);
 			return position;
 		}
 		else return p;
 	}
 
 	public Position getAdjacentDown(Position p){
-		if(p.getY()!=0) {
+		if(p.getY()!=Configs.MAP_SIZE) {
 			Position position = new Position(p.getX(), p.getY());
-			position.setX(p.getY() - 1);
+			position.setX(p.getY() + 1);
 			return position;
 		}
 		else return p;
