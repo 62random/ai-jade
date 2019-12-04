@@ -6,10 +6,15 @@ public class Fire implements Serializable {
 
     private Position 	pos;
     private int         intensity;
+    private long        startTime;
+    private boolean     active;
+    private int         extinguisher;
 
     public Fire (Position pos, int intensity){
+        startTime = System.currentTimeMillis();
         this.pos = new Position(pos);
-        this.intensity = intensity;
+        this.intensity  = intensity;
+        this.active     = true;
     }
 
     public Position getPos() {
@@ -26,5 +31,34 @@ public class Fire implements Serializable {
 
     public void setIntensity(int intensity) {
         this.intensity = intensity;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public int getExtinguisher() {
+        return extinguisher;
+    }
+
+    public void setExtinguisher(int extinguisher) {
+        this.extinguisher = extinguisher;
+    }
+
+    public void extinguish(int extinguisher){
+        this.setActive(false);
+        this.extinguisher = extinguisher;
     }
 }

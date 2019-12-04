@@ -1,11 +1,14 @@
 package Statistics;
 
+import Graphics.Configs;
+import World.Fire;
+
 import java.time.LocalDateTime;
 
 public class Stats {
 
     //env
-    private long timeElapsed;
+    private long startTime;
 
     //fires
     private int firesLit;
@@ -17,18 +20,12 @@ public class Stats {
 
 
     //resources
-    private int waterSpent;
     private int waterRefills;
-    private int fuelSpent;
     private int fuelRefills;
 
 
-    public long getTimeElapsed() {
-        return timeElapsed;
-    }
-
-    public void setTimeElapsed(long start) {
-        this.timeElapsed = System.currentTimeMillis() - start;
+    public long getStartTime() {
+        return startTime;
     }
 
     public int getFiresLit() {
@@ -43,32 +40,16 @@ public class Stats {
         return firesExtinguished;
     }
 
-    public void incrementFiresExtinguished(int n) {
-        this.firesExtinguished += n;
-    }
-
     public int getFiresExtinguishedByDrones() {
         return firesExtinguishedByDrones;
-    }
-
-    public void incrementFiresExtinguishedByDrones(int n) {
-        this.firesExtinguishedByDrones += n;
     }
 
     public int getFiresExtinguishedByAircrafts() {
         return firesExtinguishedByAircrafts;
     }
 
-    public void incrementFiresExtinguishedByAircrafts(int n) {
-        this.firesExtinguishedByAircrafts += n;
-    }
-
     public int getFiresExtinguishedByTrucks() {
         return firesExtinguishedByTrucks;
-    }
-
-    public void incrementFiresExtinguishedByTrucks(int n) {
-        this.firesExtinguishedByTrucks += n;
     }
 
     public float getAvgTimeBurning() {
@@ -79,28 +60,12 @@ public class Stats {
         this.avgTimeBurning = (avgTimeBurning*(firesExtinguished - 1) + time)/firesExtinguished;
     }
 
-    public int getWaterSpent() {
-        return waterSpent;
-    }
-
-    public void incrementWaterSpent(int n) {
-        this.waterSpent += n;
-    }
-
     public int getWaterRefills() {
         return waterRefills;
     }
 
     public void incrementWaterRefills(int n) {
         this.waterRefills +=n;
-    }
-
-    public int getFuelSpent() {
-        return fuelSpent;
-    }
-
-    public void incrementFuelSpent(int n) {
-        this.fuelSpent += n;
     }
 
     public int getFuelRefills() {
@@ -111,7 +76,32 @@ public class Stats {
         this.fuelRefills += n;
     }
 
-    public Stats() {
+    public void extinguishedFire(Fire f){
+        System.out.println("Fires extinguished " + (++this.firesExtinguished));
+        this.updateAvgTimeBurning(System.currentTimeMillis() - f.getStartTime());
+        switch (f.getExtinguisher()){
+            case Configs.AG_AIRCRAFT:
+                firesExtinguishedByAircrafts++;
+                break;
+            case Configs.AG_DRONE:
+                firesExtinguishedByDrones++;
+                break;
+            case Configs.AG_TRUCK:
+                firesExtinguishedByTrucks++;
+                break;
+        }
 
+    }
+
+    public Stats() {
+        startTime = System.currentTimeMillis();
+        this.firesLit = 0;
+        this.firesExtinguished = 0;
+        this.firesExtinguishedByDrones = 0;
+        this.firesExtinguishedByAircrafts = 0;
+        this.firesExtinguishedByTrucks = 0;
+        this.avgTimeBurning = 0;
+        this.waterRefills = 0;
+        this.fuelRefills = 0;
     }
 }

@@ -136,9 +136,10 @@ public class WorldMap implements Serializable {
 		fighters.put(fname,f);
 	}
 
-	public void extinguishFire(Position pos){
+	public Fire extinguishFire(Position pos, int extinguisher){
 		Integer removalKey = null;
 
+		Fire f = null;
 		for (Map.Entry<Integer,Fire> entry: fires.entrySet()) {
 			if(entry.getValue().getPos().equals(pos)){
 				removalKey = entry.getKey();
@@ -147,8 +148,12 @@ public class WorldMap implements Serializable {
 		}
 
 		if(removalKey != null) {
-			fires.remove(removalKey);
+			f = fires.remove(removalKey);
+			f.extinguish(extinguisher);
 		}
+
+
+		return f;
 	}
 
 	public WorldMap(int dim) {

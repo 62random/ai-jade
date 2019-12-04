@@ -1,5 +1,6 @@
 package Agents;
 
+import Graphics.Configs;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -91,7 +92,18 @@ public class HeadQuarter extends Agent {
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(), fInfo);
 								map.changeCellStatus(fInfo.getPos(),false);
-								map.extinguishFire(fInfo.getPos());
+
+								int extinguisher = -1;
+
+								if(contentObject instanceof Drone)
+									extinguisher = Configs.AG_DRONE;
+								if(contentObject instanceof Aircraft)
+									extinguisher = Configs.AG_AIRCRAFT;
+								if(contentObject instanceof Truck)
+									extinguisher = Configs.AG_TRUCK;
+
+								Fire f = map.extinguishFire(fInfo.getPos(), extinguisher);
+								addBehaviour(new SendFireStats(f));
 								System.out.println("Fire on position " + fInfo.getPos() + " was extinguished");
 							}
 						}
@@ -160,6 +172,46 @@ public class HeadQuarter extends Agent {
 			}
 		}
 		
+	}
+
+	private class SendFireStats extends OneShotBehaviour{
+
+		private Fire fire;
+
+		public SendFireStats(Fire fire){
+			this.fire = fire;
+		}
+
+		@Override
+		public void action() {
+				DFAgentDescription dfd = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("Analyst");
+				dfd.addServices(sd);
+
+				DFAgentDescription[] results;
+
+				try{
+					results = DFService.search(this.myAgent, dfd);
+					DFAgentDescription result = results[0];
+
+
+					ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+
+					AID quartel = result.getName();
+					msg.addReceiver(quartel);
+
+					try{
+						msg.setContentObject(fire);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					send(msg);
+
+				} catch (FIPAException e) {
+					e.printStackTrace();
+				}
+			}
 	}
 
 }
