@@ -183,13 +183,13 @@ public class WorldMap implements Serializable {
 				pos = new Position(i, j);
 
 				tmp = r.nextInt(100);
-				if(tmp < 3) {
+				if(tmp < Configs.PERCENT_FUEL_WATER) {
 					c = new Cell(this, pos, true, true);    //Water and fuel
 				}
-				else if(tmp < 6) {
+				else if(tmp < Configs.PERCENT_FUEL_WATER + Configs.PERCENT_WATER) {
 					c = new Cell(this, pos, true, false); //Just water
 				}
-				else if(tmp < 9) {
+				else if(tmp < Configs.PERCENT_FUEL_WATER + Configs.PERCENT_WATER + Configs.PERCENT_FUEL) {
 					c = new Cell(this, pos, false, true); //Just fuel
 				}
 				else {

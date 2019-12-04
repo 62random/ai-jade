@@ -68,9 +68,11 @@ public class MainContainer {
 		a.initMainContainerInPlatform("localhost", "9888", "MainContainer");		
 		ContainerController c = a.initContainerInPlatform("localhost", "9888", "World Container");
 
-		
+		//Criar HeadQuarter e Analyst
 		try {
 			AgentController ag = c.createNewAgent("HeadQuarter", "Agents.HeadQuarter", objs);// arguments
+			ag.start();
+			ag = c.createNewAgent("Analyst", "Agents.Analyst", objs);// arguments
 			ag.start();
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
@@ -83,7 +85,7 @@ public class MainContainer {
 			e1.printStackTrace();
 		}
 		
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < Configs.NUM_TRUCKS; i++) {
 			try {
 				AgentController ag = c.createNewAgent("Truck_" + i, "Agents.Truck", objs);// arguments
 				ag.start();
@@ -92,7 +94,7 @@ public class MainContainer {
 			}
 		}
 		
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < Configs.NUM_DRONES; i++) {
 			try {
 				AgentController ag = c.createNewAgent("Drone_" + i, "Agents.Drone", objs);// arguments
 				ag.start();
@@ -101,7 +103,7 @@ public class MainContainer {
 			}
 		}
 		
-		for(int i = 0; i < 2; i++) {
+		for(int i = 0; i < Configs.NUM_AIRCRAFTS; i++) {
 			try {
 				AgentController ag = c.createNewAgent("Aircraft_" + i, "Agents.Aircraft", objs);// arguments
 				ag.start();
