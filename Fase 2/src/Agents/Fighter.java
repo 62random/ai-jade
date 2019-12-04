@@ -13,7 +13,10 @@ import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import World.Position;
 import World.*;
@@ -28,6 +31,7 @@ public class Fighter extends Agent {
     private int 		fuelCapacity;
     private int			currentFuel;
     private int			currentWater;
+    private WorldMap	map;
     
 
     public Position getPos() {
@@ -109,7 +113,58 @@ public class Fighter extends Agent {
 
     public void consumeWater() {this.currentWater--; }
 
-    public boolean checkResources() { return true; }
+
+
+	public boolean checkResources(Fire f) {
+
+    	int water = getCurrentWater();
+    	int fuel = getCurrentFuel();
+    	Position p = f.getPos();
+
+    	Double d = p.distanceBetweenTwoPositions(this.pos);
+
+    	Map<String, Cell> res = map.getResources();
+    	Map<String, Double> closestResources = calculateClosestResources(p);
+    	String chosenResource = null;
+
+		while(chosenResource == null){
+			for(String resource : closestResources.keySet()){
+				if(res.get(resource).isFuel()){
+					chosenResource = resource;
+					break;
+				}
+			}
+		}
+		Cell c = res.get(chosenResource);
+		double distance = p.distanceBetweenTwoPositions(c.getPos());
+
+		//vê também se, para além de conseguir lá chegar, consegue chegar a outros postos de abastecimento depois de apagar o fogo
+    	if(d + distance < fuel && water > f.getIntensity()){
+    		return true;
+    	}
+
+    	return false;
+    }
+
+	public Map<String,Double> calculateClosestResources(Position p){
+		Map<String,Double> distResourcesMap = new HashMap<>();
+		Map<String, Cell> resources = map.getResources();
+
+		for (String resourceID: resources.keySet()) {
+
+			double distance = p.distanceBetweenTwoPositions(resources.get(resourceID).getPos());
+			distResourcesMap.put(resourceID, distance);
+		}
+
+		final Map<String, Double> sortedByDistance = distResourcesMap.entrySet()
+				.stream()
+				.sorted((Map.Entry.<String,Double>comparingByValue()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+		return  sortedByDistance;
+	}
+
+
 
 
     protected void setup() {

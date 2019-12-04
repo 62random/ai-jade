@@ -10,6 +10,7 @@ public class WorldMap implements Serializable {
 	private Map<Position, Cell> 	map;
 	private int 					dimension;
 	private Map<String,FighterInfo> fighters;
+	private Map<String, Cell> 		resources;
 	private Map<Integer,Fire> 		fires;
 	private int						nBurningCells = 0;
 	
@@ -64,6 +65,15 @@ public class WorldMap implements Serializable {
 
 	public void setnBurningCells(int nBurningCells) {
 		this.nBurningCells = nBurningCells+1;
+	}
+
+
+	public Map<String, Cell> getResources() {
+		return resources;
+	}
+
+	public void setResources(Map<String, Cell> resources) {
+		this.resources = resources;
 	}
 
 	public void changeCellStatus (Position p, boolean burning){

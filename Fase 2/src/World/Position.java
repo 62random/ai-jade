@@ -69,7 +69,7 @@ public class Position implements Serializable{
 	}
 
 	public Position getAdjacentLeft(Position p){
-		if(p.getX()!=1) {
+		if(p.getX()!=0) {
 			Position position = new Position(p.getX(), p.getY());
 			position.setX(p.getX() - 1);
 			return position;
@@ -96,7 +96,7 @@ public class Position implements Serializable{
 	}
 
 	public Position getAdjacentDown(Position p){
-		if(p.getY()!=1) {
+		if(p.getY()!=0) {
 			Position position = new Position(p.getX(), p.getY());
 			position.setX(p.getY() - 1);
 			return position;
