@@ -14,6 +14,8 @@ import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,7 +33,7 @@ public class Fighter extends Agent {
     private int			currentFuel;
     private int			currentWater;
     private transient WorldMap	map;
-    
+
 
     public Position getPos() {
 		return pos;
@@ -88,6 +90,26 @@ public class Fighter extends Agent {
 
 	public void setCurrentWater(int currentWater) {
 		this.currentWater = currentWater;
+	}
+
+	public void moveUpRight() {
+    	this.pos.setX(this.pos.getX() + 1);
+    	this.pos.setY(this.pos.getY() - 1);
+	}
+
+	public void moveUpLeft() {
+    	this.pos.setX(this.pos.getX() - 1);
+		this.pos.setY(this.pos.getY() - 1);
+	}
+
+	public void moveDownLeft() {
+		this.pos.setX(this.pos.getX() - 1);
+		this.pos.setY(this.pos.getY() + 1);
+	}
+
+	public void moveDownRight(){
+		this.pos.setX(this.pos.getX() + 1);
+		this.pos.setY(this.pos.getY() + 1);
 	}
 
 	public void moveRight() {
