@@ -1,6 +1,8 @@
 package World;
 
-public class Cell {
+import java.io.Serializable;
+
+public class Cell implements Serializable {
 	
 	private Position 	pos;
 	private boolean 	water;

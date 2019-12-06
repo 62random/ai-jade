@@ -74,6 +74,7 @@ public class Stats {
 
     public void incrementFuelRefills(int n) {
         this.fuelRefills += n;
+        System.out.println("Fuel refills up till now: " + fuelRefills);
     }
 
     public void extinguishedFire(Fire f){

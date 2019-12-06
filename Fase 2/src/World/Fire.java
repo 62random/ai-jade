@@ -57,8 +57,7 @@ public class Fire implements Serializable {
         this.extinguisher = extinguisher;
     }
 
-    public void extinguish(int extinguisher){
+    public void extinguish(){
         this.setActive(false);
-        this.extinguisher = extinguisher;
     }
 }

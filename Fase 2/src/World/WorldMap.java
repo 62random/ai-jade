@@ -1,4 +1,5 @@
 package World;
+import Agents.FireStarter;
 import Graphics.Configs;
 
 import java.io.Serializable;
@@ -10,7 +11,7 @@ public class WorldMap implements Serializable {
 	private Map<Position, Cell> 	map;
 	private int 					dimension;
 	private Map<String,FighterInfo> fighters;
-	private Map<Integer,Fire> 		fires;
+	private Map<Position,Fire> 		fires;
 	private int						nBurningCells = 0;
 	
 	
@@ -46,16 +47,17 @@ public class WorldMap implements Serializable {
 		return fighters.values().stream().filter( a -> a.getPos().equals(p)).collect(Collectors.toList());
 	}
 
-	public Map<Integer, Fire> getFires() {
+	public Map<Position, Fire> getFires() {
 		return fires;
 	}
 
-	public void setFires(Map<Integer, Fire> fires) {
+	public void setFires(Map<Position, Fire> fires) {
 		this.fires = fires;
 	}
 
 	public void addFire(Fire f) {
-		fires.put(nBurningCells, f);
+		changeCellStatus(f.getPos(),true);
+		fires.put(f.getPos(), f);
 	}
 
 	public int getnBurningCells() {
@@ -82,10 +84,10 @@ public class WorldMap implements Serializable {
 
 			Position p = f.getPos();
 
-			Position position1 = p.getAdjacentRight(p);
-			Position position2 = p.getAdjacentLeft(p);
-			Position position3 = p.getAdjacentDown(p);
-			Position position4 = p.getAdjacentUp(p);
+			Position position1 = p.getAdjacentRight();
+			Position position2 = p.getAdjacentLeft();
+			Position position3 = p.getAdjacentDown();
+			Position position4 = p.getAdjacentUp();
 
 			Cell c1 = map.get(position1);
 			Cell c2 = map.get(position2);
@@ -136,47 +138,26 @@ public class WorldMap implements Serializable {
 		fighters.put(fname,f);
 	}
 
-	public Fire extinguishFire(Position pos, int extinguisher){
-		Integer removalKey = null;
+	public Fire extinguishFire(Fire f){
+		if (f == null)
+			return null;
 
-		Fire f = null;
-		for (Map.Entry<Integer,Fire> entry: fires.entrySet()) {
-			if(entry.getValue().getPos().equals(pos)){
-				removalKey = entry.getKey();
-				break;
+		for(Fire fire : fires.values())
+			if (fire.getPos().equals(f.getPos())) {
+				fire.extinguish();
+				fires.remove(fire.getPos(), fire);
+				map.get(fire.getPos()).setBurning(false);
 			}
-		}
-
-		if(removalKey != null) {
-			f = fires.remove(removalKey);
-			f.extinguish(extinguisher);
-		}
-
-
 		return f;
 	}
 
 	public WorldMap(int dim) {
-		this.map 		= new TreeMap<Position, Cell>(
-				new Comparator<Position>() {
-	                @Override
-	                public int compare(Position p1, Position p2) {
-	                    int dx = p1.getX() - p2.getX(), dy = p1.getY() - p2.getY();
-	                    if(dx == 0) {
-							if (dy == 0)
-								return 0;
-							else
-								return dy;
-						}
-	                    else
-	                    	return dx;
-	                }
-	            });
-
 		this.dimension 	= dim;
+		this.map 		= new TreeMap<Position, Cell>(Position.getComparator());
+		this.fires 		= new TreeMap<Position, Fire>(Position.getComparator());
 		this.fighters 	= new HashMap<String, FighterInfo>();
-		this.fires 		= new HashMap<Integer, Fire>();
-		
+
+
 		Position pos;
 		Cell c;
 		Random r = new Random();

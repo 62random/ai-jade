@@ -1,7 +1,10 @@
 package World;
 
+import Graphics.Configs;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Position implements Serializable{
@@ -68,43 +71,40 @@ public class Position implements Serializable{
 		return false;
 	}
 
-	public Position getAdjacentLeft(Position p){
-		if(p.getX()!=1) {
-			Position position = new Position(p.getX(), p.getY());
-			position.setX(p.getX() - 1);
-			return position;
-		}
-		else return p;
+	public Position getAdjacentLeft(){
+		return getX() > 0 ? new Position(getX() - 1, getY()) : null;
 	}
 
-	public Position getAdjacentRight(Position p){
-		if(p.getX()!=199) {
-			Position position = new Position(p.getX(), p.getY());
-			position.setX(p.getX() + 1);
-			return position;
-		}
-		else return p;
+	public Position getAdjacentRight(){
+		return getX() < Configs.MAP_SIZE ? new Position(getX() + 1, getY()) : null;
 	}
 
-	public Position getAdjacentUp(Position p){
-		if(p.getY()!=199) {
-			Position position = new Position(p.getX(), p.getY());
-			position.setX(p.getY() + 1);
-			return position;
-		}
-		else return p;
+	public Position getAdjacentUp(){
+		return getY() > 0 ? new Position(getX(), getY() - 1) : null;
 	}
 
-	public Position getAdjacentDown(Position p){
-		if(p.getY()!=1) {
-			Position position = new Position(p.getX(), p.getY());
-			position.setX(p.getY() - 1);
-			return position;
-		}
-		else return p;
+	public Position getAdjacentDown(){
+		return getY() < Configs.MAP_SIZE ? new Position(getX(), getY() + 1) : null;
 	}
 
     public boolean coordsEqual(int i, int j) {
 		return x==i && y==j;
     }
+
+    public static Comparator<Position> getComparator(){
+		return new Comparator<Position>() {
+			@Override
+			public int compare(Position p1, Position p2) {
+				int dx = p1.getX() - p2.getX(), dy = p1.getY() - p2.getY();
+				if(dx == 0) {
+					if (dy == 0)
+						return 0;
+					else
+						return dy;
+				}
+				else
+					return dx;
+			}
+		};
+	}
 }

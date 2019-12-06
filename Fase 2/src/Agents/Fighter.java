@@ -1,5 +1,6 @@
 package Agents;
 
+import Graphics.Configs;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -14,6 +15,7 @@ import jade.lang.acl.ACLMessage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import World.Position;
 import World.*;
@@ -28,6 +30,7 @@ public class Fighter extends Agent {
     private int 		fuelCapacity;
     private int			currentFuel;
     private int			currentWater;
+    private transient WorldMap	map;
     
 
     public Position getPos() {
@@ -131,7 +134,7 @@ public class Fighter extends Agent {
 		this.available = true;
 		addBehaviour(new NotifyOfExistence());
 		
-		WorldMap map = (WorldMap) getArguments()[0];
+		map = (WorldMap) getArguments()[0];
 		
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 
@@ -140,7 +143,7 @@ public class Fighter extends Agent {
     }
 
     
-private class NotifyOfExistence extends OneShotBehaviour{
+	private class NotifyOfExistence extends OneShotBehaviour{
     	
     	public void action(){
     		DFAgentDescription dfd = new DFAgentDescription();
@@ -172,10 +175,46 @@ private class NotifyOfExistence extends OneShotBehaviour{
     	}
     }
 
-private class MoveAndNotify extends OneShotBehaviour {
+	private class NotifyOfRefill extends OneShotBehaviour{
+
+    	private int quantity;
+    	private int resource;
+    	private String message;
+
+    	public NotifyOfRefill(int resource, int quantity){
+    		this.quantity = quantity;
+    		this.resource = resource;
+    		this.message = resource + " " + quantity;
+		}
+
+		public void action(){
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("HeadQuarter");
+			dfd.addServices(sd);
+
+			DFAgentDescription[] results;
+
+			try{
+				results = DFService.search(this.myAgent, dfd);
+				DFAgentDescription result = results[0];
+
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+
+				AID quartel = result.getName();
+				msg.addReceiver(quartel);
+				msg.setContent(message);
+
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	private class MoveAndNotify extends OneShotBehaviour {
 	
 	private Position destination;
-	private Boolean available;
 	
 	public MoveAndNotify(Position p) {
 		super();
@@ -184,52 +223,60 @@ private class MoveAndNotify extends OneShotBehaviour {
 
 	@Override
 	public void action() {
-		Integer performative = 0;
 		Fighter me = ((Fighter) myAgent);
 		Position p = me.getPos();
-		WorldMap map = (WorldMap) getArguments()[0];
 		Cell c = map.getMap().get(p);
 
-		if (destination.equals(me.getPos())) {
+		if(c.isBurning() && me.getCurrentWater() > 0) {
 			me.consumeWater();
-			if(map.getMap().get(p.getAdjacentDown(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
-				destination = p.getAdjacentDown(p);
-				me.addBehaviour(new MoveAndNotify(destination));
-			} else if(map.getMap().get(p.getAdjacentUp(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
-				destination = p.getAdjacentUp(p);
-				me.addBehaviour(new MoveAndNotify(destination));
-			} else if(map.getMap().get(p.getAdjacentLeft(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
-				destination = p.getAdjacentLeft(p);
-				me.addBehaviour(new MoveAndNotify(destination));
-			} else if(map.getMap().get(p.getAdjacentRight(p)).isBurning() && me.getCurrentWater()>0 && me.getCurrentFuel()>0) {
-				destination = p.getAdjacentRight(p);
-				me.addBehaviour(new MoveAndNotify(destination));
-			} else {
-				me.setAvailable(true);
-			}
-			performative = ACLMessage.CONFIRM;
+			Fire fire = map.getFires().values().stream().filter(f -> f.getPos().equals(p)).collect(Collectors.toList()).get(0);
+
+			if(myAgent instanceof Drone)
+				fire.setExtinguisher(Configs.AG_DRONE);
+			if(myAgent instanceof Aircraft)
+				fire.setExtinguisher(Configs.AG_AIRCRAFT);
+			if(myAgent instanceof Truck)
+				fire.setExtinguisher(Configs.AG_TRUCK);
+
+			myAgent.addBehaviour(new NotifyFireExtinction(fire));
 		}
-		else if(c.isBurning() && me.getCurrentWater()>1) {
-			me.consumeWater();
-			performative = ACLMessage.CONFIRM;
-			me.addBehaviour(new MoveAndNotify(destination));
-		}
-		else if(c.isFuel() && me.getCurrentFuel() != me.getFuelCapacity()) {
-			me.setCurrentFuel(getFuelCapacity());
-			performative = ACLMessage.ACCEPT_PROPOSAL;
-			me.addBehaviour(new MoveAndNotify(destination));
-			System.out.println("Agent " + me.getName() + " refilled fuel!");
-		}
-		else if(c.isWater() && me.getCurrentWater() != me.getWaterCapacity()) {
+
+		if (c.isWater() && me.getCurrentWater() < me.getWaterCapacity()){
+			int difference = getWaterCapacity() - getCurrentWater();
 			me.setCurrentWater(getWaterCapacity());
-			performative = ACLMessage.ACCEPT_PROPOSAL;
-			me.addBehaviour(new MoveAndNotify(destination));
+			addBehaviour(new NotifyOfRefill(Configs.CELL_WATER, difference));
 			System.out.println("Agent " + me.getName() + " refilled water!");
 		}
-		else {
-			me.setAvailable(false);
-			performative = ACLMessage.ACCEPT_PROPOSAL;
 
+		if (c.isFuel() && me.getCurrentFuel() < me.getFuelCapacity()){
+			int difference = getFuelCapacity() - getCurrentFuel();
+			me.setCurrentFuel(getFuelCapacity());
+			addBehaviour(new NotifyOfRefill(Configs.CELL_FUEL, difference));
+			System.out.println("Agent " + me.getName() + " refilled fuel!");
+		}
+
+		//substituir mais tarde o que está aqui no meio por comportamento inteligente
+		if(destination.equals(me.getPos())) {
+			if (me.getCurrentWater() > 0 && me.getCurrentFuel() > 0){
+				if(map.getMap().get(p.getAdjacentDown()).isBurning()) {
+					destination = p.getAdjacentDown();
+				} else if(map.getMap().get(p.getAdjacentLeft()).isBurning()) {
+					destination = p.getAdjacentLeft();
+				}else if(map.getMap().get(p.getAdjacentUp()).isBurning()) {
+					destination = p.getAdjacentUp();
+				} else if(map.getMap().get(p.getAdjacentRight()).isBurning()) {
+					destination = p.getAdjacentRight();
+				} else {
+					me.setAvailable(true);
+
+					return;
+				}
+			}
+		}
+
+		me.consumeFuel();
+		//System.out.println("Agent " + me.getName() + " moved to " + me.getPos());
+		if (me.getCurrentFuel() > 0)
 			if(p.getX() < destination.getX() ) {
 				me.moveRight();
 			}
@@ -239,28 +286,9 @@ private class MoveAndNotify extends OneShotBehaviour {
 			else if(p.getY() < destination.getY()) {
 				me.moveDown();
 			}
-			else {
+			else if(p.getY() > destination.getY()){
 				me.moveUp();
 			}
-			//substituir mais tarde o que está aqui no meio por comportamento inteligente
-
-			me.consumeFuel();
-
-			System.out.println("Agent " + me.getName() + " moved to " + me.getPos());
-
-			//TODO se passou num incêndio apaga-o
-
-			int speed = 500/me.getSpeed();
-
-			try {
-				Thread.sleep(speed);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			me.addBehaviour(new MoveAndNotify(destination));
-
-		}
 
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
@@ -272,7 +300,7 @@ private class MoveAndNotify extends OneShotBehaviour {
 		try{
 			results = DFService.search(this.myAgent, dfd);
 			DFAgentDescription result = results[0];
-
+			Integer performative = ACLMessage.INFORM;
 			ACLMessage msg = new ACLMessage(performative);
 
 			AID quartel = result.getName();
@@ -288,6 +316,14 @@ private class MoveAndNotify extends OneShotBehaviour {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
+
+		try {
+			Thread.sleep(Configs.TICK_DURATION/me.getSpeed());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		me.addBehaviour(new MoveAndNotify(destination));
 	}
 }
 
@@ -305,6 +341,7 @@ private class MoveAndNotify extends OneShotBehaviour {
                     case(ACLMessage.PROPOSE):
                         if(contentObject instanceof Fire){
                             Position destination = (((Fire) contentObject).getPos());
+							((Fighter) this.myAgent).setAvailable(false);
                             addBehaviour(new MoveAndNotify(destination));
                         }
                 }
@@ -313,4 +350,42 @@ private class MoveAndNotify extends OneShotBehaviour {
             }
         }
 }
+
+	private class NotifyFireExtinction extends OneShotBehaviour {
+
+    	private Fire fire;
+    	public  NotifyFireExtinction(Fire f) {
+    		this.fire = f;
+		}
+
+		@Override
+		public void action() {
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("HeadQuarter");
+			dfd.addServices(sd);
+
+			DFAgentDescription[] results;
+
+			try{
+				results = DFService.search(this.myAgent, dfd);
+				DFAgentDescription result = results[0];
+				Integer performative = ACLMessage.INFORM;
+				ACLMessage msg = new ACLMessage(performative);
+
+				AID quartel = result.getName();
+				msg.addReceiver(quartel);
+
+				try{
+					msg.setContentObject(this.fire);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				send(msg);
+
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }

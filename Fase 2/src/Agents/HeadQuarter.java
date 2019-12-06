@@ -9,6 +9,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -23,6 +24,7 @@ public class HeadQuarter extends Agent {
 	
 	private WorldMap map;
 	private Position pos;
+	private ArrayDeque<Fire> queue;
 	
 	protected void setup() {
 		super.setup();
@@ -44,8 +46,8 @@ public class HeadQuarter extends Agent {
 		addBehaviour(new ReceiveInfo());
 		
 		map = (WorldMap) getArguments()[0];
-		
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
+		queue = new ArrayDeque<Fire>();
 	}
     
 	private class ReceiveInfo extends CyclicBehaviour {
@@ -60,18 +62,53 @@ public class HeadQuarter extends Agent {
 				Object contentObject = msg.getContentObject();
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
-						if(contentObject instanceof Fighter) {
+						if (contentObject instanceof  Fire){
+							Fire fire = (Fire) contentObject;
+							map.extinguishFire(fire);
+							addBehaviour(new SendFireStats(fire));
+							System.out.println("Fire on position " + fire.getPos() + " was extinguished");
+						}
+						else if (contentObject instanceof  String) {
+							String str = (String) contentObject;
+							try{
+								DFAgentDescription dfd = new DFAgentDescription();
+								ServiceDescription sd = new ServiceDescription();
+								sd.setType("Analyst");
+								dfd.addServices(sd);
+
+								DFAgentDescription[] results = DFService.search(this.myAgent, dfd);
+
+								if (results.length > 0) {
+									ACLMessage forward = new ACLMessage(ACLMessage.INFORM);
+									forward.addReceiver(results[0].getName());
+
+									try{
+										forward.setContentObject(str);
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									send(forward);
+								}
+							} catch (FIPAException e) {
+								e.printStackTrace();
+							}
+
+						}
+						else if(contentObject instanceof Fighter) {
 							FighterInfo fInfo = new FighterInfo(((Fighter) contentObject));
 							map.addFighter(fInfo);
-							System.out.println("Added agent " + ((Fighter) contentObject).getName());
+							if (fInfo.isAvailable()) {
+								System.out.println("Agent " + ((Fighter) contentObject).getName() + " available at " + fInfo.getPos());
+							} else {
+								System.out.println("Agent " + ((Fighter) contentObject).getName() + " moved to " + fInfo.getPos());
+							}
 						}
 						if(contentObject instanceof FireStarter) {
-							map.setnBurningCells(map.getnBurningCells());
 							Fire fire = new Fire(((FireStarter) contentObject).getPos(),((FireStarter) contentObject).getIntensity());
+							queue.add(fire);
 							map.addFire(fire);
-							map.changeCellStatus(((FireStarter) contentObject).getPos(),true);
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
-							addBehaviour(new HandlerCheckCombatentes(map.getnBurningCells()));
+							addBehaviour(new HandlerCheckCombatentes(fire));
 						}
 						break;
 					case(ACLMessage.ACCEPT_PROPOSAL):
@@ -84,30 +121,6 @@ public class HeadQuarter extends Agent {
 							}
 						}
 						break;
-					case(ACLMessage.CONFIRM):
-						if(contentObject instanceof Fighter) {
-							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
-							if (fInfo != null) {
-								fInfo.setPos(((Fighter) contentObject).getPos());
-								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
-								map.changeFighterData(fInfo.getAID(), fInfo);
-								map.changeCellStatus(fInfo.getPos(),false);
-
-								int extinguisher = -1;
-
-								if(contentObject instanceof Drone)
-									extinguisher = Configs.AG_DRONE;
-								if(contentObject instanceof Aircraft)
-									extinguisher = Configs.AG_AIRCRAFT;
-								if(contentObject instanceof Truck)
-									extinguisher = Configs.AG_TRUCK;
-
-								Fire f = map.extinguishFire(fInfo.getPos(), extinguisher);
-								addBehaviour(new SendFireStats(f));
-								System.out.println("Fire on position " + fInfo.getPos() + " was extinguished");
-							}
-						}
-						break;
 				} 
 			}catch (UnreadableException e) {
 				// TODO Auto-generated catch block
@@ -117,14 +130,13 @@ public class HeadQuarter extends Agent {
 	}
 	private class HandlerCheckCombatentes extends OneShotBehaviour{
 
-		private int fireID;
+		private Fire targetFire;
 		
-		public HandlerCheckCombatentes(int fireID){
-			this.fireID = fireID;
+		public HandlerCheckCombatentes(Fire f){
+			this.targetFire = f;
 		}
 
 		public void action() {
-			Fire targetFire = map.getFires().get(fireID);
 			Map<String,FighterInfo> fighters = map.getFighters();
 			Map<String,Double> closestFighters = map.calculateClosestFighters(targetFire.getPos());
 			String chosenFighter = null;

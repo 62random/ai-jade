@@ -2,6 +2,9 @@ package Graphics;
 
 public final class Configs {
 
+    //System Settings
+    public final static int TICK_DURATION       = 300;
+
     //Map settings
     public final static int MAP_SIZE            = 50;
     public final static int CELL_DIMENSION      = 20;

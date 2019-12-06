@@ -1,5 +1,6 @@
 package Agents;
 
+import Graphics.Configs;
 import Statistics.Stats;
 import World.FighterInfo;
 import World.Fire;
@@ -55,6 +56,19 @@ public class Analyst extends Agent {
                             Fire f = (Fire) contentObject;
                             if(!f.isActive()){
                                 stats.extinguishedFire(f);
+                            }
+                        }
+                        else if (contentObject instanceof  String){
+                            int resource = Integer.parseInt(((String) contentObject).split(" ")[0]);
+                            int quantity = Integer.parseInt(((String) contentObject).split(" ")[1]);
+
+                            switch (resource){
+                                case Configs.CELL_WATER:
+                                    stats.incrementWaterRefills(quantity);
+                                    break;
+                                case Configs.CELL_FUEL:
+                                    stats.incrementFuelRefills(quantity);
+                                    break;
                             }
                         }
                         break;
