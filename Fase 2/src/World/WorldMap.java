@@ -95,7 +95,7 @@ public class WorldMap implements Serializable {
 				prop = 1;
 			}
 
-			for(int i = 0; i < prop; i++){
+			for(int i = 0; i < prop && cells.size() > 0; i++){
 				Cell c = cells.remove(generator.nextInt(cells.size()));
 				if(c != null && !c.isBurning())
 					container.newFire(c.getPos());

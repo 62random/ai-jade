@@ -198,7 +198,8 @@ public class Fighter extends Agent {
 			} catch (FIPAException e) {
 				e.printStackTrace();
 			}
-		}
+			block();
+    	}
 	}
 
 	private class NotifyOfState extends OneShotBehaviour{
@@ -230,8 +231,10 @@ public class Fighter extends Agent {
 			} catch (FIPAException e) {
 				e.printStackTrace();
 			}
+			block();
 		}
-	}
+
+    }
 
 	private class MoveAndNotify extends OneShotBehaviour {
 	
@@ -306,7 +309,7 @@ public class Fighter extends Agent {
 				} else {
 					me.setAvailable(true);
 					this.myAgent.addBehaviour(new NotifyOfState());
-
+					block();
 					return;
 				}
 			}
@@ -328,8 +331,10 @@ public class Fighter extends Agent {
 				} else if (p.getY() > checkpoint.getY()) {
 					me.moveUp();
 				}
-			} else
+			} else {
+				block();
 				return;
+			}
 		} catch (NullPointerException e){
 			e.printStackTrace();
 		}
@@ -344,6 +349,8 @@ public class Fighter extends Agent {
 		}
 
 		me.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, checkpoint));
+		block();
+		return;
 	}
 }
 

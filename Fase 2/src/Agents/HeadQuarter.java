@@ -235,17 +235,13 @@ public class HeadQuarter extends Agent {
 	private class CheckFireQueue extends TickerBehaviour {
 
 		public CheckFireQueue(Agent a) {
-			super(a, Configs.TICK_DURATION);
+			super(a, Configs.TICK_DURATION/5);
 		}
 
 		@Override
 		protected void onTick() {
-			Iterator<Fire> it = queue.iterator();
-			Fire f;
-			while(it.hasNext()){
-				f = it.next();
-				queue.remove(f);
-				this.myAgent.addBehaviour(new HandlerCheckCombatentes(f));
+			if (queue.size() > 0){
+				this.myAgent.addBehaviour(new HandlerCheckCombatentes(queue.pop()));
 			}
 		}
 	}

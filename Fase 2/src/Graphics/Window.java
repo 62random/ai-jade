@@ -7,6 +7,7 @@ import javax.swing.*;
 public class Window extends JFrame implements Runnable{
 
     WorldMap world;
+    Map     map;
 
     public Window(WorldMap world) {
 
@@ -16,9 +17,9 @@ public class Window extends JFrame implements Runnable{
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
+        map = new Map(this.world);
 
-
-        add(new Map(world));
+        add(map);
 
         setVisible(true);
 
@@ -29,7 +30,7 @@ public class Window extends JFrame implements Runnable{
         while (true){
             this.repaint();
             try {
-                Thread.sleep(30);
+                Thread.sleep(60);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
