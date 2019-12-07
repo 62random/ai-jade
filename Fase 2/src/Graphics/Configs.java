@@ -6,7 +6,7 @@ public final class Configs {
     public final static int TICK_DURATION       = 300;
 
     //Map settings
-    public final static int MAP_SIZE            = 50;
+    public final static int MAP_SIZE            = 30;
     public final static int CELL_DIMENSION      = 20;
     public final static int NUM_TRUCKS          = 5;
     public final static int NUM_AIRCRAFTS       = 2;
@@ -18,6 +18,7 @@ public final class Configs {
 
 
     //Images
+    public final static String IMG_TREE         = "resources/map/tree.png";
     public final static String IMG_GRASS        = "resources/map/grass.png";
     public final static String IMG_FIRE         = "resources/map/fire.png";
     public final static String IMG_WATER        = "resources/map/water.png";
@@ -29,7 +30,7 @@ public final class Configs {
 
     public final static int CELL_FIRE           = 0;
     public final static int CELL_WATER          = 1;
-    public final static int CELL_FUEL = 2;
+    public final static int CELL_FUEL           = 2;
 
     public final static int AG_TRUCK            = 1;
     public final static int AG_DRONE            = 2;
