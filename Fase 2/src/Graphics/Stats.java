@@ -10,11 +10,11 @@ import java.awt.*;
 public class Stats extends JPanel {
     Statistics.Stats stats;
 
-    public Stats(){
+    public Stats(Statistics.Stats stats){
+        this.stats = stats;
         Border blackline = BorderFactory.createTitledBorder("Statistics");
         setBorder(blackline);
-        JTextArea cena = new JTextArea();
-        cena.setText("yay");
+        JLabel cena = new JLabel("Estatísticas");
         add(cena);
     }
 

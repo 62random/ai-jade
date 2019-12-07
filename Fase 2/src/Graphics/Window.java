@@ -7,10 +7,11 @@ import java.awt.*;
 
 public class Window extends JFrame implements Runnable{
 
-    WorldMap world;
-    Map     map;
+    private WorldMap world;
+    private Map     map;
+    private Stats stats;
 
-    public Window(WorldMap world) {
+    public Window(WorldMap world, Statistics.Stats s) {
 
         this.world = world;
         setTitle("AI 2019");
@@ -19,17 +20,14 @@ public class Window extends JFrame implements Runnable{
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
-        Map map = new Map(world);
-        Stats stats = new Stats();
         map = new Map(this.world);
+        Stats stats = new Stats(s);
 
         JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, map, stats);
 
         sp.setDividerLocation(605);
         getContentPane().add(sp);
         sp.setOneTouchExpandable(true);
-        add(map);
-
         setVisible(true);
 
     }

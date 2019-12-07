@@ -2,6 +2,7 @@ package Main;
 
 import Graphics.Configs;
 import Graphics.Window;
+import Statistics.Stats;
 import World.Position;
 import World.WorldMap;
 import jade.core.Profile;
@@ -69,6 +70,7 @@ public class MainContainer {
 		a.objs 				= new Object[1];
 		a.objs[0] 			= map;
 
+		Statistics.Stats stats = new Statistics.Stats();
 		
 		a.initMainContainerInPlatform("localhost", "9888", "MainContainer");		
 		a.cc = a.initContainerInPlatform("localhost", "9888", "World Container");
@@ -77,7 +79,9 @@ public class MainContainer {
 		try {
 			AgentController ag = a.cc.createNewAgent("HeadQuarter", "Agents.HeadQuarter", a.objs);// arguments
 			ag.start();
-			ag = a.cc.createNewAgent("Analyst", "Agents.Analyst", a.objs);// arguments
+			Object[] analyst_arg = new Object[1];
+			analyst_arg[0] = stats;
+			ag = a.cc.createNewAgent("Analyst", "Agents.Analyst", analyst_arg);// arguments
 			ag.start();
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
@@ -124,7 +128,7 @@ public class MainContainer {
             e.printStackTrace();
         }
 
-		a.window = new Window(map);
+		a.window = new Window(map, stats);
         Thread t = new Thread(a.window);
         t.start();
 

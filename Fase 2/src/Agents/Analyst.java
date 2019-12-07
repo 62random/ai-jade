@@ -22,6 +22,8 @@ public class Analyst extends Agent {
     protected void setup() {
         super.setup();
 
+        this.stats = (Stats) getArguments()[0];
+
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -34,8 +36,6 @@ public class Analyst extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-
-        stats = new Stats();
 
         addBehaviour(new ReceiveStats());
     }
