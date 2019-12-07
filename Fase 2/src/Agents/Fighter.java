@@ -14,6 +14,8 @@ import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -160,11 +162,9 @@ public class Fighter extends Agent {
 		
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 
-		addBehaviour(new MoveToFire());
-
+		this.addBehaviour(new MoveToFire());
     }
 
-    
 	private class NotifyOfExistence extends OneShotBehaviour{
     	
     	public void action(){
@@ -229,17 +229,21 @@ public class Fighter extends Agent {
 		}
 	}
 
-
 	private class MoveAndNotify extends OneShotBehaviour {
 	
 	private Position destination;
+	private Position checkpoint;
 	
-	public MoveAndNotify(Position p) {
-		super();
-		this.destination = p;
+
+	public MoveAndNotify(Fighter f, Position destination, Position checkpoint) {
+		this.myAgent = f;
+		this.destination = destination;
+		if(checkpoint == null)
+			this.checkpoint = map.getCheckpoint(new FighterInfo((Fighter) myAgent), destination);
+		else
+			this.checkpoint = checkpoint;
 	}
 
-	@Override
 	public void action() {
 		Fighter me = ((Fighter) myAgent);
 		Position p = me.getPos();
@@ -275,15 +279,24 @@ public class Fighter extends Agent {
 
 		//substituir mais tarde o que está aqui no meio por comportamento inteligente
 		if(destination.equals(me.getPos())) {
-			if (me.getCurrentWater() > 0 && me.getCurrentFuel() > 0){
-				if(map.getMap().get(p.getAdjacentDown()).isBurning()) {
-					destination = p.getAdjacentDown();
-				} else if(map.getMap().get(p.getAdjacentLeft()).isBurning()) {
-					destination = p.getAdjacentLeft();
-				}else if(map.getMap().get(p.getAdjacentUp()).isBurning()) {
-					destination = p.getAdjacentUp();
-				} else if(map.getMap().get(p.getAdjacentRight()).isBurning()) {
-					destination = p.getAdjacentRight();
+			if (me.getCurrentWater() > 0){
+				ArrayList<Position> poss; FighterInfo fInfo = new FighterInfo(me);
+				if(map.getMap().get(p.getAdjacentDown()) != null && map.getMap().get(p.getAdjacentDown()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentDown());
+					if(map.inRange(fInfo, poss))
+						destination = p.getAdjacentDown();
+				} else if(map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentLeft());
+					if(map.inRange(fInfo, poss))
+						destination = p.getAdjacentLeft();
+				}else if(map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentUp());
+					if(map.inRange(fInfo, poss))
+						destination = p.getAdjacentUp();
+				} else if(map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentRight());
+					if(map.inRange(fInfo, poss))
+						destination = p.getAdjacentRight();
 				} else {
 					me.setAvailable(true);
 
@@ -292,15 +305,19 @@ public class Fighter extends Agent {
 			}
 		}
 
+		if(checkpoint.equals(me.getPos())){
+			checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
+		}
+
 		me.consumeFuel();
 		if (me.getCurrentFuel() > 0) {
-			if (p.getX() < destination.getX()) {
+			if (p.getX() < checkpoint.getX()) {
 				me.moveRight();
-			} else if (p.getX() > destination.getX()) {
+			} else if (p.getX() > checkpoint.getX()) {
 				me.moveLeft();
-			} else if (p.getY() < destination.getY()) {
+			} else if (p.getY() < checkpoint.getY()) {
 				me.moveDown();
-			} else if (p.getY() > destination.getY()) {
+			} else if (p.getY() > checkpoint.getY()) {
 				me.moveUp();
 			}
 		}else
@@ -340,11 +357,12 @@ public class Fighter extends Agent {
 			e.printStackTrace();
 		}
 
-		me.addBehaviour(new MoveAndNotify(destination));
+		me.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, checkpoint));
 	}
 }
 
 	private class MoveToFire extends CyclicBehaviour{
+
 
         public void action(){
 
@@ -358,8 +376,37 @@ public class Fighter extends Agent {
                     case(ACLMessage.PROPOSE):
                         if(contentObject instanceof Fire){
                             Position destination = (((Fire) contentObject).getPos());
+
+							DFAgentDescription dfd = new DFAgentDescription();
+							ServiceDescription sd = new ServiceDescription();
+							sd.setType("HeadQuarter");
+							dfd.addServices(sd);
+
+							DFAgentDescription[] results;
+
+							try{
+								results = DFService.search(myAgent, dfd);
+								DFAgentDescription result = results[0];
+
+								ACLMessage resp = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+
+								AID quartel = result.getName();
+								resp.addReceiver(quartel);
+
+
+								try {
+									resp.setContentObject(destination);
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+
+								send(resp);
+
+							} catch (FIPAException e) {
+								e.printStackTrace();
+							}
 							((Fighter) this.myAgent).setAvailable(false);
-                            addBehaviour(new MoveAndNotify(destination));
+                            myAgent.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, null));
                         }
                 }
             } catch (UnreadableException e) {

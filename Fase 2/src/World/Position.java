@@ -56,6 +56,10 @@ public class Position implements Serializable{
 		return  (float) Math.sqrt((x - p.getX())*(x-p.getX()) + (y - p.getY())*(y-p.getY()));
 	}
 
+	public int steps(Position p){
+		return Math.abs(p.getX() - x) + Math.abs(p.getY() - y);
+	}
+
 	public boolean isAdjacent(Position p){
 		return (x - p.getX())*(x - p.getX()) == 1 || (y - p.getY())*(y - p.getY()) == 1;
 	}
@@ -95,5 +99,15 @@ public class Position implements Serializable{
 					return dx;
 			}
 		};
+	}
+
+	public boolean notIn(List<Position> l){
+		boolean ret = true;
+		for (Position p : l)
+			if(this.equals(p)) {
+				ret = false;
+				break;
+			}
+		return ret;
 	}
 }

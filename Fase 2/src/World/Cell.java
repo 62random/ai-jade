@@ -1,6 +1,9 @@
 package World;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Cell implements Serializable {
 	
@@ -9,6 +12,7 @@ public class Cell implements Serializable {
 	private boolean 	fuel;
 	private boolean		burning;
 	private WorldMap	world;
+	private Path 		paths;
 	
 	
 	public Position getPos() {
@@ -36,13 +40,21 @@ public class Cell implements Serializable {
 		this.burning = burning;
 	}
 
-	
+	public Path getPaths() {
+		return paths;
+	}
+
+	public void setPaths(Path p) {
+		this.paths = p;
+	}
+
 	public Cell(WorldMap world, Position pos, boolean water, boolean fuel) {
 		this.pos = pos;
 		this.water = water;
 		this.fuel = fuel;
 		this.burning = false;
 		this.world = world;
+		this.paths = new Path(world, pos);
 	}
 	
 }
