@@ -57,9 +57,13 @@ public class HeadQuarter extends Agent {
 			ACLMessage msg = receive();
 			
 			if (msg==null) {block(); return;}
-			
-			try{
-				Object contentObject = msg.getContentObject();
+
+				Object contentObject;
+				try {
+					contentObject = msg.getContentObject();
+				} catch (UnreadableException e){
+					contentObject = msg.getContent();
+				}
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
 						if (contentObject instanceof  Fire){
@@ -120,11 +124,7 @@ public class HeadQuarter extends Agent {
 							}
 						}
 						break;
-				} 
-			}catch (UnreadableException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				}
 		}
 	}
 

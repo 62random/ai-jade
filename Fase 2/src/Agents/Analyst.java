@@ -59,22 +59,25 @@ public class Analyst extends Agent {
                             }
                         }
                         else if (contentObject instanceof  String){
+                            System.out.println((String) contentObject);
                             int resource = Integer.parseInt(((String) contentObject).split(" ")[0]);
                             int quantity = Integer.parseInt(((String) contentObject).split(" ")[1]);
+                            String agent = (((String) contentObject).split(" "))[2];
 
                             switch (resource){
                                 case Configs.CELL_WATER:
                                     stats.incrementWaterRefills(quantity);
+                                    System.out.println("Agent " + agent + " refilled water!");
                                     break;
                                 case Configs.CELL_FUEL:
                                     stats.incrementFuelRefills(quantity);
+                                    System.out.println("Agent " + agent + " refilled fuel!");
                                     break;
                             }
                         }
                         break;
                 }
             }catch (UnreadableException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

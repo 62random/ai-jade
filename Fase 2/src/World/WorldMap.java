@@ -97,7 +97,7 @@ public class WorldMap implements Serializable {
 
 			for(int i = 0; i < prop; i++){
 				Cell c = cells.remove(generator.nextInt(cells.size()));
-				if(!c.isBurning())
+				if(c != null && !c.isBurning())
 					container.newFire(c.getPos());
 			}
 
@@ -118,7 +118,6 @@ public class WorldMap implements Serializable {
 						.stream()
 						.sorted((Map.Entry.<String,Double>comparingByValue()))
 						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2) -> e1, LinkedHashMap::new));
-		System.out.println(sortedByDistance.toString());
 		return  sortedByDistance;
 	}
 
@@ -246,7 +245,6 @@ public class WorldMap implements Serializable {
 					ret = ret || inRange(fighterInfo, nextit);
 				}
 			}
-			System.out.println(ret);
 			return ret;
 		}
 	}
@@ -280,14 +278,29 @@ public class WorldMap implements Serializable {
 
 		fillStepsTable(steps, current, fighterInfo.getFuelCapacity());
 
-		Position ret = null;
+		Position ret = destination;
 		min = 100;
 		for(Map.Entry<Position, Integer> e : steps.entrySet()) {
-			if(e.getKey().steps(fighterInfo.getPos()) < fighterInfo.getCurrentFuel())
-				if(e.getValue() < min)
+			if(!e.getKey().equals(fighterInfo.getPos()) && e.getKey().steps(fighterInfo.getPos()) < fighterInfo.getCurrentFuel())
+				if(destination.steps(e.getKey()) < min) {
+					min = destination.steps(e.getKey());
 					ret = e.getKey();
+				}
 		}
-		System.out.println(ret);
 		return ret;
+	}
+
+	public Position getNearestFuel(FighterInfo fighterInfo) {
+		int min = Configs.MAP_SIZE;
+		Position ret = fighterInfo.getPos();
+
+		for (Map.Entry<Path, Integer> e : map.get(fighterInfo.getPos()).getPaths().getPaths().entrySet()) {
+			if (e.getValue() < fighterInfo.getCurrentFuel() && e.getValue() < min) {
+				min = e.getValue();
+				ret = e.getKey().getPos();
+			}
+		}
+
+		return  ret;
 	}
 }
