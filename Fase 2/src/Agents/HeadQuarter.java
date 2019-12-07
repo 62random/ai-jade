@@ -57,9 +57,13 @@ public class HeadQuarter extends Agent {
 			ACLMessage msg = receive();
 			
 			if (msg==null) {block(); return;}
-			
-			try{
-				Object contentObject = msg.getContentObject();
+
+				Object contentObject;
+				try {
+					contentObject = msg.getContentObject();
+				} catch (UnreadableException e){
+					contentObject = msg.getContent();
+				}
 				switch(msg.getPerformative()) {
 					case(ACLMessage.INFORM):
 						if (contentObject instanceof  Fire){
@@ -111,21 +115,16 @@ public class HeadQuarter extends Agent {
 						}
 						break;
 					case(ACLMessage.ACCEPT_PROPOSAL):
-						if(contentObject instanceof Fighter) {
-							FighterInfo fInfo = map.getFighters().get(((Fighter) contentObject).getName());
-							if (fInfo != null && !((Fighter) contentObject).isAvailable()) {
-								fInfo.setPos(((Fighter) contentObject).getPos());
-								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
+						if(contentObject instanceof Fire) {
+							FighterInfo fInfo = map.getFighters().get(msg.getSender());
+							if (fInfo != null) {
+								fInfo.setAvailable(false);
 								map.changeFighterData(fInfo.getAID(), fInfo);
-								queue.pop();
+								queue.remove(contentObject);
 							}
 						}
 						break;
-				} 
-			}catch (UnreadableException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				}
 		}
 	}
 
@@ -144,7 +143,9 @@ public class HeadQuarter extends Agent {
 
 			while(chosenFighter == null) {
 				for (String fighter : closestFighters.keySet()) {
-					if(fighters.get(fighter).isAvailable()) {
+					ArrayList<Position> poss = new ArrayList<>();
+					poss.add(targetFire.getPos());
+					if(fighters.get(fighter).isAvailable() && map.inRange(fighters.get(fighter), poss)) {
 						chosenFighter = fighter;
 						break;
 					}
@@ -164,7 +165,8 @@ public class HeadQuarter extends Agent {
 				if (results.length > 0) {
 					for (DFAgentDescription dfd1 : results) {
 						provider = dfd1.getName();
-						if (provider.getName().equals(chosenFighter)) break;
+						if (provider.getName().equals(chosenFighter))
+							break;
 					}
 
 					System.out.println("Requesting help from fighter: " + provider.getName());
@@ -177,6 +179,7 @@ public class HeadQuarter extends Agent {
 						e.printStackTrace();
 					}
 					send(msg);
+
 				}
 				else {
 					System.out.println("Fighter " + chosenFighter + " not found!");

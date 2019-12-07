@@ -1,5 +1,7 @@
 package Agents;
 
+import Graphics.Configs;
+
 import java.util.ArrayList;
 
 public class Aircraft extends Fighter {  
@@ -7,9 +9,9 @@ public class Aircraft extends Fighter {
     protected void setup() {
 		super.setup();
 
-		this.setSpeed(1);
-		this.setWaterCapacity(15);
-		this.setFuelCapacity(20);
+		this.setSpeed(Configs.AIRCRAFT_SPEED);
+		this.setWaterCapacity(Configs.AIRCRAFT_WATER);
+		this.setFuelCapacity(Configs.AIRCRAFT_FUEL);
 		this.setCurrentFuel(this.getFuelCapacity());
 		this.setCurrentWater(this.getWaterCapacity());
 

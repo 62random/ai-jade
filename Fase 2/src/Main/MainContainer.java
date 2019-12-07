@@ -130,7 +130,7 @@ public class MainContainer {
 
 
 
-		while(a.numFire < 5000) {
+		while(a.numFire < 50000) {
 			AgentController ag;
 			try {
 				ag = a.cc.createNewAgent("FireStarter_"+ a.numFire++, "Agents.FireStarter", a.objs);
@@ -141,7 +141,7 @@ public class MainContainer {
 			}// arguments
 
 			try {
-				Thread.sleep(7000);
+				Thread.sleep(Configs.TICK_DURATION*5);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

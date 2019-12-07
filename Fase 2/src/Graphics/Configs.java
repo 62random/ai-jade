@@ -15,10 +15,20 @@ public final class Configs {
     public final static int PERCENT_WATER       = 2;
     public final static int PERCENT_FUEL        = 2;
 
+    //AGENTS
+    public final static int TRUCK_FUEL          = 15;
+    public final static int DRONE_FUEL          = 5;
+    public final static int AIRCRAFT_FUEL       = 20;
+    public final static int TRUCK_WATER         = 10;
+    public final static int DRONE_WATER         = 2;
+    public final static int AIRCRAFT_WATER      = 15;
+    public final static int TRUCK_SPEED         = 2;
+    public final static int DRONE_SPEED         = 4;
+    public final static int AIRCRAFT_SPEED      = 1;
+
 
 
     //Images
-    public final static String IMG_TREE         = "resources/map/tree.png";
     public final static String IMG_GRASS        = "resources/map/grass.png";
     public final static String IMG_FIRE         = "resources/map/fire.png";
     public final static String IMG_WATER        = "resources/map/water.png";

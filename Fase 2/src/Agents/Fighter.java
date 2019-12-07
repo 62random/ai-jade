@@ -5,6 +5,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -14,6 +15,8 @@ import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -154,47 +157,13 @@ public class Fighter extends Agent {
 		}
 
 		this.available = true;
-		addBehaviour(new NotifyOfExistence());
+		addBehaviour(new NotifyOfState());
 		
 		map = (WorldMap) getArguments()[0];
 		
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 
-		addBehaviour(new MoveToFire());
-
-    }
-
-    
-	private class NotifyOfExistence extends OneShotBehaviour{
-    	
-    	public void action(){
-    		DFAgentDescription dfd = new DFAgentDescription();
-			ServiceDescription sd = new ServiceDescription();
-			sd.setType("HeadQuarter");
-			dfd.addServices(sd);
-			
-			DFAgentDescription[] results;
-			
-			try{
-				results = DFService.search(this.myAgent, dfd);
-				DFAgentDescription result = results[0];
-								
-				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-				
-				AID quartel = result.getName();
-				msg.addReceiver(quartel);
-				
-				try{
-					msg.setContentObject(this.myAgent);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				send(msg);
-				
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
-    	}
+		this.addBehaviour(new MoveToFire());
     }
 
 	private class NotifyOfRefill extends OneShotBehaviour{
@@ -204,6 +173,35 @@ public class Fighter extends Agent {
     	public NotifyOfRefill(int resource, int quantity){
     		this.message = resource + " " + quantity;
 		}
+
+		public void action(){
+    		message += " " + this.myAgent.getName();
+
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("HeadQuarter");
+			dfd.addServices(sd);
+
+			DFAgentDescription[] results;
+
+			try{
+				results = DFService.search(this.myAgent, dfd);
+				DFAgentDescription result = results[0];
+
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+
+				AID quartel = result.getName();
+				msg.addReceiver(quartel);
+				msg.setContent(message);
+				send(msg);
+
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class NotifyOfState extends OneShotBehaviour{
 
 		public void action(){
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -221,7 +219,13 @@ public class Fighter extends Agent {
 
 				AID quartel = result.getName();
 				msg.addReceiver(quartel);
-				msg.setContent(message);
+
+				try{
+					msg.setContentObject(this.myAgent);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				send(msg);
 
 			} catch (FIPAException e) {
 				e.printStackTrace();
@@ -229,17 +233,21 @@ public class Fighter extends Agent {
 		}
 	}
 
-
 	private class MoveAndNotify extends OneShotBehaviour {
 	
 	private Position destination;
+	private Position checkpoint;
 	
-	public MoveAndNotify(Position p) {
-		super();
-		this.destination = p;
+
+	public MoveAndNotify(Fighter f, Position destination, Position checkpoint) {
+		this.myAgent = f;
+		this.destination = destination;
+		if(checkpoint == null)
+			this.checkpoint = map.getCheckpoint(new FighterInfo((Fighter) myAgent), destination);
+		else
+			this.checkpoint = checkpoint;
 	}
 
-	@Override
 	public void action() {
 		Fighter me = ((Fighter) myAgent);
 		Position p = me.getPos();
@@ -263,76 +271,71 @@ public class Fighter extends Agent {
 			int difference = getWaterCapacity() - getCurrentWater();
 			me.setCurrentWater(getWaterCapacity());
 			addBehaviour(new NotifyOfRefill(Configs.CELL_WATER, difference));
-			System.out.println("Agent " + me.getName() + " refilled water!");
 		}
 
 		if (c.isFuel() && me.getCurrentFuel() < me.getFuelCapacity()){
 			int difference = getFuelCapacity() - getCurrentFuel();
 			me.setCurrentFuel(getFuelCapacity());
 			addBehaviour(new NotifyOfRefill(Configs.CELL_FUEL, difference));
-			System.out.println("Agent " + me.getName() + " refilled fuel!");
 		}
 
 		//substituir mais tarde o que está aqui no meio por comportamento inteligente
 		if(destination.equals(me.getPos())) {
-			if (me.getCurrentWater() > 0 && me.getCurrentFuel() > 0){
-				if(map.getMap().get(p.getAdjacentDown()).isBurning()) {
-					destination = p.getAdjacentDown();
-				} else if(map.getMap().get(p.getAdjacentLeft()).isBurning()) {
-					destination = p.getAdjacentLeft();
-				}else if(map.getMap().get(p.getAdjacentUp()).isBurning()) {
-					destination = p.getAdjacentUp();
-				} else if(map.getMap().get(p.getAdjacentRight()).isBurning()) {
-					destination = p.getAdjacentRight();
+			if (me.getCurrentWater() > 0){
+				ArrayList<Position> poss; FighterInfo fInfo = new FighterInfo(me);
+				if(p.getAdjacentDown() != null && map.getMap().get(p.getAdjacentDown()) != null && map.getMap().get(p.getAdjacentDown()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentDown());
+					if(map.inRange(fInfo, poss)) {
+						checkpoint = destination = p.getAdjacentDown();
+					}
+				} else if(p.getAdjacentLeft() != null && map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentLeft());
+					if(map.inRange(fInfo, poss))
+						checkpoint = destination = p.getAdjacentLeft();
+				}else if(p.getAdjacentUp() != null && map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning()) {
+					poss = new ArrayList<>(); poss.add(p.getAdjacentUp());
+					if(map.inRange(fInfo, poss))
+						checkpoint = destination = p.getAdjacentUp();
+				} else if(p.getAdjacentRight() != null && map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning()) {
+					poss = new ArrayList<>();
+					poss.add(p.getAdjacentRight());
+					if (map.inRange(fInfo, poss))
+						checkpoint = destination = p.getAdjacentRight();
+				}else if (me.getCurrentFuel() < me.getFuelCapacity()){
+					checkpoint = destination = map.getNearestFuel(new FighterInfo(me));
 				} else {
 					me.setAvailable(true);
+					this.myAgent.addBehaviour(new NotifyOfState());
 
 					return;
 				}
 			}
 		}
 
+		if(checkpoint.equals(me.getPos())){
+			checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
+		}
+
 		me.consumeFuel();
-		if (me.getCurrentFuel() > 0) {
-			if (p.getX() < destination.getX()) {
-				me.moveRight();
-			} else if (p.getX() > destination.getX()) {
-				me.moveLeft();
-			} else if (p.getY() < destination.getY()) {
-				me.moveDown();
-			} else if (p.getY() > destination.getY()) {
-				me.moveUp();
-			}
-		}else
-			return;
-
-
-		DFAgentDescription dfd = new DFAgentDescription();
-		ServiceDescription sd = new ServiceDescription();
-		sd.setType("HeadQuarter");
-		dfd.addServices(sd);
-
-		DFAgentDescription[] results;
-
-		try{
-			results = DFService.search(this.myAgent, dfd);
-			DFAgentDescription result = results[0];
-			Integer performative = ACLMessage.INFORM;
-			ACLMessage msg = new ACLMessage(performative);
-
-			AID quartel = result.getName();
-			msg.addReceiver(quartel);
-
-			try{
-				msg.setContentObject(this.myAgent);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			send(msg);
-
-		} catch (FIPAException e) {
+		try {
+			if (me.getCurrentFuel() > 0) {
+				if (p.getX() < checkpoint.getX()) {
+					me.moveRight();
+				} else if (p.getX() > checkpoint.getX()) {
+					me.moveLeft();
+				} else if (p.getY() < checkpoint.getY()) {
+					me.moveDown();
+				} else if (p.getY() > checkpoint.getY()) {
+					me.moveUp();
+				}
+			} else
+				return;
+		} catch (NullPointerException e){
 			e.printStackTrace();
 		}
+
+
+		this.myAgent.addBehaviour(new NotifyOfState());
 
 		try {
 			Thread.sleep(Configs.TICK_DURATION/me.getSpeed());
@@ -340,11 +343,12 @@ public class Fighter extends Agent {
 			e.printStackTrace();
 		}
 
-		me.addBehaviour(new MoveAndNotify(destination));
+		me.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, checkpoint));
 	}
 }
 
 	private class MoveToFire extends CyclicBehaviour{
+
 
         public void action(){
 
@@ -357,9 +361,44 @@ public class Fighter extends Agent {
                 switch (msg.getPerformative()) {
                     case(ACLMessage.PROPOSE):
                         if(contentObject instanceof Fire){
-                            Position destination = (((Fire) contentObject).getPos());
-							((Fighter) this.myAgent).setAvailable(false);
-                            addBehaviour(new MoveAndNotify(destination));
+                        	Fire f = (Fire) contentObject;
+                            Position destination = f.getPos();
+							if(!((Fighter) this.myAgent).isAvailable())
+								return;
+                            ((Fighter) this.myAgent).setAvailable(false);
+
+							DFAgentDescription dfd = new DFAgentDescription();
+							ServiceDescription sd = new ServiceDescription();
+							sd.setType("HeadQuarter");
+							dfd.addServices(sd);
+
+							DFAgentDescription[] results;
+
+							try{
+								results = DFService.search(myAgent, dfd);
+								DFAgentDescription result = results[0];
+
+								ACLMessage resp = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+
+								AID quartel = result.getName();
+								resp.addReceiver(quartel);
+
+
+								try {
+									resp.setContentObject(destination);
+								} catch (IOException e) {
+									e.printStackTrace();
+									((Fighter) this.myAgent).setAvailable(false);
+								}
+
+								send(resp);
+
+							} catch (FIPAException e) {
+								e.printStackTrace();
+								((Fighter) this.myAgent).setAvailable(true);
+							}
+
+                            myAgent.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, null));
                         }
                 }
             } catch (UnreadableException e) {

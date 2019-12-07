@@ -2,7 +2,9 @@ package World;
 import Graphics.Configs;
 import Main.MainContainer;
 
+import java.io.ObjectInputFilter;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,10 +77,14 @@ public class WorldMap implements Serializable {
 			Fire f = (Fire) values[generator.nextInt(values.length)];
 
 			ArrayList<Cell> cells = new ArrayList<Cell>();
-			cells.add(map.get(f.getPos().getAdjacentUp()));
-			cells.add(map.get(f.getPos().getAdjacentDown()));
-			cells.add(map.get(f.getPos().getAdjacentRight()));
-			cells.add(map.get(f.getPos().getAdjacentLeft()));
+			if (f.getPos().getAdjacentUp() != null)
+				cells.add(map.get(f.getPos().getAdjacentUp()));
+			if (f.getPos().getAdjacentDown() != null)
+				cells.add(map.get(f.getPos().getAdjacentDown()));
+			if (f.getPos().getAdjacentRight() != null)
+				cells.add(map.get(f.getPos().getAdjacentRight()));
+			if (f.getPos().getAdjacentLeft() != null)
+				cells.add(map.get(f.getPos().getAdjacentLeft()));
 
 			int prop = 0;
 			if (f.getIntensity() > 4) {
@@ -91,7 +97,7 @@ public class WorldMap implements Serializable {
 
 			for(int i = 0; i < prop; i++){
 				Cell c = cells.remove(generator.nextInt(cells.size()));
-				if(!c.isBurning())
+				if(c != null && !c.isBurning())
 					container.newFire(c.getPos());
 			}
 
@@ -112,7 +118,6 @@ public class WorldMap implements Serializable {
 						.stream()
 						.sorted((Map.Entry.<String,Double>comparingByValue()))
 						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2) -> e1, LinkedHashMap::new));
-		System.out.println(sortedByDistance.toString());
 		return  sortedByDistance;
 	}
 
@@ -173,6 +178,30 @@ public class WorldMap implements Serializable {
 
 				map.put(pos, c);
 			}
+
+		fillCellResourceInfo();
+	}
+
+	private void fillCellResourceInfo() {
+		Position p;
+		Cell aux;
+		int d, x, y;
+		for (Cell c: map.values()) {
+			p = c.getPos();
+			for(int i = -Configs.TRUCK_FUEL; i < Configs.TRUCK_FUEL; i++)
+				for(int j = -Configs.TRUCK_FUEL; j < Configs.TRUCK_FUEL; j++) {
+					d = Math.abs(i) + Math.abs(j);
+					x = p.getX() + i;
+					y = p.getY() + j;
+					if( 0 < x && x < Configs.MAP_SIZE && 0 < y && y < Configs.MAP_SIZE)
+						if(0 < d && d < Configs.TRUCK_FUEL){
+							aux = map.get(new Position(x, y));
+							if(aux.isFuel())
+								c.getPaths().getPaths().put(aux.getPaths(), d);
+						}
+				}
+		}
+
 	}
 
 	public ArrayList<Integer> agentsOn(int i, int j) {
@@ -199,5 +228,79 @@ public class WorldMap implements Serializable {
 			list.add(Configs.CELL_FIRE);
 
 		return list;
+	}
+
+	public boolean inRange(FighterInfo fighterInfo, ArrayList<Position> poss) {
+
+		Position current = poss.get(poss.size()-1);
+		if(current.steps(fighterInfo.getPos()) < fighterInfo.getCurrentFuel() / 2)
+			return true;
+		else {
+			boolean ret = false;
+			ArrayList<Position> nextit;
+			for (Map.Entry<Path, Integer> e : map.get(current).getPaths().getPaths().entrySet()){
+				if(e.getKey().getPos().notIn(poss) && e.getValue() <= fighterInfo.getFuelCapacity()) {
+					nextit = new ArrayList<>(poss);
+					nextit.add(e.getKey().getPos());
+					ret = ret || inRange(fighterInfo, nextit);
+				}
+			}
+			return ret;
+		}
+	}
+
+	public  void fillStepsTable(TreeMap<Position, Integer> steps, Path p, int fuel){
+		int current_steps;
+		if(steps.get(p.getPos()) == null)
+			current_steps = 0;
+		else
+			current_steps = steps.get(p.getPos());
+
+		for(Map.Entry<Path, Integer> e : p.getPaths().entrySet()) {
+			if(e.getValue() < fuel) {
+				if(steps.get(e.getKey().getPos()) == null || steps.get(e.getKey().getPos()) > current_steps + 1){
+					steps.put(e.getKey().getPos(), current_steps + 1);
+					fillStepsTable(steps, e.getKey(), fuel);
+				}
+			}
+		}
+	}
+
+	public Position getCheckpoint(FighterInfo fighterInfo, Position destination) {
+		TreeMap<Position, Integer> steps = new TreeMap<Position, Integer>(Position.getComparator());
+		Path current = map.get(destination).getPaths();
+		int min = Configs.MAP_SIZE;
+		for( int i : current.getPaths().values())
+			if (i < min)
+				min = i;
+		if(current.getPos().steps(fighterInfo.getPos()) + min < fighterInfo.getCurrentFuel())
+			return current.getPos();
+
+		fillStepsTable(steps, current, fighterInfo.getFuelCapacity());
+
+		Position ret = destination;
+		min = 100;
+		for(Map.Entry<Position, Integer> e : steps.entrySet()) {
+			if(!e.getKey().equals(fighterInfo.getPos()) && e.getKey().steps(fighterInfo.getPos()) < fighterInfo.getCurrentFuel())
+				if(destination.steps(e.getKey()) < min) {
+					min = destination.steps(e.getKey());
+					ret = e.getKey();
+				}
+		}
+		return ret;
+	}
+
+	public Position getNearestFuel(FighterInfo fighterInfo) {
+		int min = Configs.MAP_SIZE;
+		Position ret = fighterInfo.getPos();
+
+		for (Map.Entry<Path, Integer> e : map.get(fighterInfo.getPos()).getPaths().getPaths().entrySet()) {
+			if (e.getValue() < fighterInfo.getCurrentFuel() && e.getValue() < min) {
+				min = e.getValue();
+				ret = e.getKey().getPos();
+			}
+		}
+
+		return  ret;
 	}
 }
