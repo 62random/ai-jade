@@ -199,13 +199,9 @@ public class Fighter extends Agent {
 
 	private class NotifyOfRefill extends OneShotBehaviour{
 
-    	private int quantity;
-    	private int resource;
     	private String message;
 
     	public NotifyOfRefill(int resource, int quantity){
-    		this.quantity = quantity;
-    		this.resource = resource;
     		this.message = resource + " " + quantity;
 		}
 
@@ -297,20 +293,19 @@ public class Fighter extends Agent {
 		}
 
 		me.consumeFuel();
-		//System.out.println("Agent " + me.getName() + " moved to " + me.getPos());
-		if (me.getCurrentFuel() > 0)
-			if(p.getX() < destination.getX() ) {
+		if (me.getCurrentFuel() > 0) {
+			if (p.getX() < destination.getX()) {
 				me.moveRight();
-			}
-			else if(p.getX() > destination.getX()) {
+			} else if (p.getX() > destination.getX()) {
 				me.moveLeft();
-			}
-			else if(p.getY() < destination.getY()) {
+			} else if (p.getY() < destination.getY()) {
 				me.moveDown();
-			}
-			else if(p.getY() > destination.getY()){
+			} else if (p.getY() > destination.getY()) {
 				me.moveUp();
 			}
+		}else
+			return;
+
 
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();

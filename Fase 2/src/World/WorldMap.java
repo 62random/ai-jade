@@ -1,6 +1,6 @@
 package World;
-import Agents.FireStarter;
 import Graphics.Configs;
+import Main.MainContainer;
 
 import java.io.Serializable;
 import java.util.*;
@@ -12,7 +12,7 @@ public class WorldMap implements Serializable {
 	private int 					dimension;
 	private Map<String,FighterInfo> fighters;
 	private Map<Position,Fire> 		fires;
-	private int						nBurningCells = 0;
+	private MainContainer			container;
 	
 	
 	public Map<Position, Cell> getMap() {
@@ -60,14 +60,6 @@ public class WorldMap implements Serializable {
 		fires.put(f.getPos(), f);
 	}
 
-	public int getnBurningCells() {
-		return nBurningCells;
-	}
-
-	public void setnBurningCells(int nBurningCells) {
-		this.nBurningCells = nBurningCells+1;
-	}
-
 	public void changeCellStatus (Position p, boolean burning){
 		Cell c = map.get(p);
 		c.setBurning(burning);
@@ -76,41 +68,31 @@ public class WorldMap implements Serializable {
 
 	public void propagateFire(){
 
-		if(fires.size()>0) {
+		if(fires.size() > 0) {
 
 			Random generator = new Random();
 			Object[] values = fires.values().toArray();
 			Fire f = (Fire) values[generator.nextInt(values.length)];
 
-			Position p = f.getPos();
+			ArrayList<Cell> cells = new ArrayList<Cell>();
+			cells.add(map.get(f.getPos().getAdjacentUp()));
+			cells.add(map.get(f.getPos().getAdjacentDown()));
+			cells.add(map.get(f.getPos().getAdjacentRight()));
+			cells.add(map.get(f.getPos().getAdjacentLeft()));
 
-			Position position1 = p.getAdjacentRight();
-			Position position2 = p.getAdjacentLeft();
-			Position position3 = p.getAdjacentDown();
-			Position position4 = p.getAdjacentUp();
-
-			Cell c1 = map.get(position1);
-			Cell c2 = map.get(position2);
-			Cell c3 = map.get(position3);
-			Cell c4 = map.get(position4);
-
+			int prop = 0;
 			if (f.getIntensity() > 4) {
-				c1.setBurning(true);
-				c2.setBurning(true);
-				c3.setBurning(true);
-				c4.setBurning(true);
-				map.put(position1, c1);
-				map.put(position2, c2);
-				map.put(position3, c3);
-				map.put(position4, c4);
-			} else if (f.getIntensity() < 4 && f.getIntensity() > 1) {
-				c1.setBurning(true);
-				c2.setBurning(true);
-				map.put(position1, c1);
-				map.put(position2, c2);
+				prop = 4;
+			} else if (f.getIntensity() > 1) {
+				prop = 2;
 			} else {
-				c1.setBurning(true);
-				map.put(position1, c1);
+				prop = 1;
+			}
+
+			for(int i = 0; i < prop; i++){
+				Cell c = cells.remove(generator.nextInt(cells.size()));
+				if(!c.isBurning())
+					container.newFire(c.getPos());
 			}
 
 			System.out.println("Fire on position " + f.getPos() + " has propagated");
@@ -122,7 +104,7 @@ public class WorldMap implements Serializable {
 		Map<String,Double> distFightersMap = new HashMap<>();
 
 		for (String fighterID: fighters.keySet()) {
-			double distance = p.distanceBetweenTwoPositions(fighters.get(fighterID).getPos());
+			double distance = p.distance(fighters.get(fighterID).getPos());
 			distFightersMap.put(fighterID, distance);
 		}
 
@@ -130,7 +112,7 @@ public class WorldMap implements Serializable {
 						.stream()
 						.sorted((Map.Entry.<String,Double>comparingByValue()))
 						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2) -> e1, LinkedHashMap::new));
-
+		System.out.println(sortedByDistance.toString());
 		return  sortedByDistance;
 	}
 
@@ -142,20 +124,27 @@ public class WorldMap implements Serializable {
 		if (f == null)
 			return null;
 
+		ArrayList<Fire> fs = new ArrayList<Fire>();
+
 		for(Fire fire : fires.values())
 			if (fire.getPos().equals(f.getPos())) {
 				fire.extinguish();
-				fires.remove(fire.getPos(), fire);
+				fs.add(fire);
 				map.get(fire.getPos()).setBurning(false);
 			}
+		for (Fire t:
+			 fs) {
+			fires.remove(t.getPos(), t);
+		}
 		return f;
 	}
 
-	public WorldMap(int dim) {
+	public WorldMap(int dim, MainContainer container) {
 		this.dimension 	= dim;
 		this.map 		= new TreeMap<Position, Cell>(Position.getComparator());
 		this.fires 		= new TreeMap<Position, Fire>(Position.getComparator());
 		this.fighters 	= new HashMap<String, FighterInfo>();
+		this.container 	= container;
 
 
 		Position pos;

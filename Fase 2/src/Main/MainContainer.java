@@ -2,6 +2,7 @@ package Main;
 
 import Graphics.Configs;
 import Graphics.Window;
+import World.Position;
 import World.WorldMap;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -15,6 +16,9 @@ public class MainContainer {
 	Runtime rt;
 	ContainerController container;
 	Window window;
+	Object[] objs;
+	int numFire = 0;
+	ContainerController cc;
 
 	public ContainerController initContainerInPlatform(String host, String port, String containerName) {
 		// Get the JADE runtime interface (singleton)
@@ -61,18 +65,19 @@ public class MainContainer {
 	
 	public static void main(String[] args) {
 		MainContainer a 	= new MainContainer();
-		WorldMap map 		= new WorldMap(Configs.MAP_SIZE);
-		Object[] objs 		= new Object[1];
-		objs[0] = map;
+		WorldMap map 		= new WorldMap(Configs.MAP_SIZE, a);
+		a.objs 				= new Object[1];
+		a.objs[0] 			= map;
+
 		
 		a.initMainContainerInPlatform("localhost", "9888", "MainContainer");		
-		ContainerController c = a.initContainerInPlatform("localhost", "9888", "World Container");
+		a.cc = a.initContainerInPlatform("localhost", "9888", "World Container");
 
 		//Criar HeadQuarter e Analyst
 		try {
-			AgentController ag = c.createNewAgent("HeadQuarter", "Agents.HeadQuarter", objs);// arguments
+			AgentController ag = a.cc.createNewAgent("HeadQuarter", "Agents.HeadQuarter", a.objs);// arguments
 			ag.start();
-			ag = c.createNewAgent("Analyst", "Agents.Analyst", objs);// arguments
+			ag = a.cc.createNewAgent("Analyst", "Agents.Analyst", a.objs);// arguments
 			ag.start();
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
@@ -87,7 +92,7 @@ public class MainContainer {
 		
 		for(int i = 0; i < Configs.NUM_TRUCKS; i++) {
 			try {
-				AgentController ag = c.createNewAgent("Truck_" + i, "Agents.Truck", objs);// arguments
+				AgentController ag = a.cc.createNewAgent("Truck_" + i, "Agents.Truck", a.objs);// arguments
 				ag.start();
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
@@ -96,7 +101,7 @@ public class MainContainer {
 		
 		for(int i = 0; i < Configs.NUM_DRONES; i++) {
 			try {
-				AgentController ag = c.createNewAgent("Drone_" + i, "Agents.Drone", objs);// arguments
+				AgentController ag = a.cc.createNewAgent("Drone_" + i, "Agents.Drone", a.objs);// arguments
 				ag.start();
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
@@ -105,7 +110,7 @@ public class MainContainer {
 		
 		for(int i = 0; i < Configs.NUM_AIRCRAFTS; i++) {
 			try {
-				AgentController ag = c.createNewAgent("Aircraft_" + i, "Agents.Aircraft", objs);// arguments
+				AgentController ag = a.cc.createNewAgent("Aircraft_" + i, "Agents.Aircraft", a.objs);// arguments
 				ag.start();
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
@@ -124,11 +129,11 @@ public class MainContainer {
         t.start();
 
 
-		int numFire = 0;
-		while(numFire < 1000) {
+
+		while(a.numFire < 5000) {
 			AgentController ag;
 			try {
-				ag = c.createNewAgent("FireStarter_"+numFire++, "Agents.FireStarter", objs);
+				ag = a.cc.createNewAgent("FireStarter_"+ a.numFire++, "Agents.FireStarter", a.objs);
 				ag.start();
 			} catch (StaleProxyException e) {
 				// TODO Auto-generated catch block
@@ -148,5 +153,18 @@ public class MainContainer {
 
 	}
 
-	
+
+    public void newFire(Position pos) {
+		AgentController ag;
+		Object[] objs2 = new Object[2];
+		objs2[0] = objs[0];
+
+		objs2[1] = pos;
+		try {
+			ag = cc.createNewAgent("FireStarter_"+ numFire++, "Agents.FireStarter", objs2);
+			ag.start();
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+    }
 }

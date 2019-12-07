@@ -51,50 +51,13 @@ public class Position implements Serializable{
 		return "(" + this.x + ", " + this.y + ")";
 	}
 
-	public double distanceBetweenTwoPositions(Position p2){
+	public float distance(Position p){
 
-		int distance = 0;
-		int x1 = this.getX();
-		int y1 = this.getY();
-
-		while(!(x1 == p2.getX() && y1 == p2.getY())) {
-			if (x1 < p2.getX() && y1 < p2.getY()) {
-				x1++;
-				y1++;
-			} else if (x1 < p2.getX() && y1 > p2.getY()) {
-				x1++;
-				y1--;
-			} else if (x1 > p2.getX() && y1 > p2.getY()) {
-				x1--;
-				y1--;
-			} else if (x1 > p2.getX() && y1 < p2.getY()) {
-				x1--;
-				y1++;
-			} else if (x1 < p2.getX()) {
-				x1++;
-			} else if (x1 > p2.getX()) {
-				x1--;
-			} else if (y1 < p2.getY()) {
-				y1++;
-			} else {
-				y1--;
-			}
-			distance++;
-		}
-		return  distance;
+		return  (float) Math.sqrt((x - p.getX())*(x-p.getX()) + (y - p.getY())*(y-p.getY()));
 	}
 
-	public boolean isAdjacent(Position p2){
-		if(this.x == p2.getX()+1 && this.y == p2.getY()+1){ return true; }
-		if(this.x == p2.getX()+1 && this.y == p2.getY()){ return true; }
-		if(this.x == p2.getX()+1 && this.y == p2.getY()-1){ return true; }
-		if(this.x == p2.getX() && this.y == p2.getY()-1){ return true; }
-		if(this.x == p2.getX()-1 && this.y == p2.getY()-1){ return true; }
-		if(this.x == p2.getX()-1 && this.y == p2.getY()) {return true; }
-		if(this.x == p2.getX()-1 && this.y == p2.getY()+1){ return true; }
-		if(this.x == p2.getX() && this.y == p2.getY()+1){ return true; }
-
-		return false;
+	public boolean isAdjacent(Position p){
+		return (x - p.getX())*(x - p.getX()) == 1 || (y - p.getY())*(y - p.getY()) == 1;
 	}
 
 	public Position getAdjacentLeft(){

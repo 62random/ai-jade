@@ -42,8 +42,11 @@ public class FireStarter extends Agent {
 		Random r = new Random();
 		
 		WorldMap map = (WorldMap) getArguments()[0];
-		
-		pos = new Position(r.nextInt(map.getDimension()), r.nextInt(map.getDimension()));
+
+		if(getArguments().length == 2)
+			pos = (Position) getArguments()[1];
+		else
+			pos = new Position(r.nextInt(map.getDimension()), r.nextInt(map.getDimension()));
 
 		intensity = r.nextInt(6);
 	}

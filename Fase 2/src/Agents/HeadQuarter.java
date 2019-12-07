@@ -1,6 +1,7 @@
 package Agents;
 
 import Graphics.Configs;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -9,10 +10,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import jade.core.*;
 import jade.core.behaviours.CyclicBehaviour;
@@ -48,6 +46,8 @@ public class HeadQuarter extends Agent {
 		map = (WorldMap) getArguments()[0];
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 		queue = new ArrayDeque<Fire>();
+
+		addBehaviour(new CheckFireQueue(this));
 	}
     
 	private class ReceiveInfo extends CyclicBehaviour {
@@ -105,10 +105,9 @@ public class HeadQuarter extends Agent {
 						}
 						if(contentObject instanceof FireStarter) {
 							Fire fire = new Fire(((FireStarter) contentObject).getPos(),((FireStarter) contentObject).getIntensity());
-							queue.add(fire);
+							queue.push(fire);
 							map.addFire(fire);
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
-							addBehaviour(new HandlerCheckCombatentes(fire));
 						}
 						break;
 					case(ACLMessage.ACCEPT_PROPOSAL):
@@ -118,6 +117,7 @@ public class HeadQuarter extends Agent {
 								fInfo.setPos(((Fighter) contentObject).getPos());
 								fInfo.setAvailable(((Fighter) contentObject).isAvailable());
 								map.changeFighterData(fInfo.getAID(), fInfo);
+								queue.pop();
 							}
 						}
 						break;
@@ -128,6 +128,7 @@ public class HeadQuarter extends Agent {
 			}
 		}
 	}
+
 	private class HandlerCheckCombatentes extends OneShotBehaviour{
 
 		private Fire targetFire;
@@ -149,6 +150,7 @@ public class HeadQuarter extends Agent {
 					}
 				}
 			}
+
 
 			try{
 				DFAgentDescription dfd = new DFAgentDescription();
@@ -226,4 +228,22 @@ public class HeadQuarter extends Agent {
 			}
 	}
 
+
+	private class CheckFireQueue extends TickerBehaviour {
+
+		public CheckFireQueue(Agent a) {
+			super(a, Configs.TICK_DURATION);
+		}
+
+		@Override
+		protected void onTick() {
+			Iterator<Fire> it = queue.iterator();
+			Fire f;
+			while(it.hasNext()){
+				f = it.next();
+				queue.remove(f);
+				this.myAgent.addBehaviour(new HandlerCheckCombatentes(f));
+			}
+		}
+	}
 }
