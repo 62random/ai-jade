@@ -6,8 +6,8 @@ public final class Configs {
     public final static int TICK_DURATION       = 300;
 
     //Map settings
-    public final static int MAP_SIZE            = 200;
-    public final static int CELL_DIMENSION      = 5;
+    public final static int MAP_SIZE            = 30;
+    public final static int CELL_DIMENSION      = 20;
     public final static int NUM_TRUCKS          = 5;
     public final static int NUM_AIRCRAFTS       = 2;
     public final static int NUM_DRONES          = 10;
