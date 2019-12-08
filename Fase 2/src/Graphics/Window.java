@@ -21,14 +21,20 @@ public class Window extends JFrame implements Runnable{
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
         map = new Map(this.world);
-        Stats stats = new Stats(s);
+        stats = new Stats(s);
 
         JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, map, stats);
+
+
 
         sp.setDividerLocation(605);
         getContentPane().add(sp);
         sp.setOneTouchExpandable(true);
         setVisible(true);
+
+    }
+
+    public Window() {
 
     }
 
