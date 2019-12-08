@@ -309,4 +309,34 @@ public class WorldMap implements Serializable {
 
 		return  ret;
 	}
+
+	public Position getNearestWater(Position pos, int fuel) {
+		Position ret = null;
+
+		int x = pos.getX() , y = pos.getY();
+		for(int i = 0; i < Configs.MAP_SIZE; i++)
+			for(int j = 0; j < Configs.MAP_SIZE; j++) {
+				if( x - i > 0 && x - i < Configs.MAP_SIZE && y - j > 0 && y - j < Configs.MAP_SIZE) {
+					ret = new Position(x - i, y - j);
+					if(map.get(ret).isWater())
+						return ret;
+				}
+				else if( x - i > 0 && x - i < Configs.MAP_SIZE && y + j > 0 && y + j < Configs.MAP_SIZE) {
+					ret = new Position(x - i, y + j);
+					if(map.get(ret).isWater())
+						return ret;
+				}
+				else if( x + i > 0 && x + i < Configs.MAP_SIZE && y - j > 0 && y - j < Configs.MAP_SIZE) {
+					ret = new Position(x + i, y - j);
+					if(map.get(ret).isWater())
+						return ret;
+				}
+				else if( x + i > 0 && x + i < Configs.MAP_SIZE && y + j > 0 && y + j < Configs.MAP_SIZE) {
+					ret = new Position(x + i, y + j);
+					if(map.get(ret).isWater())
+						return ret;
+				}
+			}
+		return ret;
+	}
 }

@@ -291,29 +291,41 @@ public class Fighter extends Agent {
 						destination = p.getAdjacentDown();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 					}
-				} else if(p.getAdjacentLeft() != null && map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning()) {
+				}
+				else if(p.getAdjacentLeft() != null && map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning()) {
 					if(map.inRange(fInfo, p.getAdjacentLeft())) {
 						destination = p.getAdjacentLeft();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 					}
-				}else if(p.getAdjacentUp() != null && map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning()) {
+				}
+				else if(p.getAdjacentUp() != null && map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning()) {
 					if(map.inRange(fInfo, p.getAdjacentUp())) {
 						destination = p.getAdjacentUp();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 					}
-				} else if(p.getAdjacentRight() != null && map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning()) {
+				}
+				else if(p.getAdjacentRight() != null && map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning()) {
 					if (map.inRange(fInfo, p.getAdjacentRight())) {
 						destination = p.getAdjacentRight();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 					}
-				}else if (me.getCurrentFuel() < me.getFuelCapacity()){
+				}
+				else if (me.getCurrentFuel() < me.getFuelCapacity()){
 					checkpoint = destination = map.getNearestFuel(fInfo.getPos(), fInfo.getCurrentFuel());
+				}
+				else if (me.getCurrentWater() < me.getWaterCapacity()){
+					destination = map.getNearestWater(fInfo.getPos(), fInfo.getCurrentFuel());
+					checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 				} else {
 					me.setAvailable(true);
 					this.myAgent.addBehaviour(new NotifyOfState());
 					block();
 					return;
 				}
+			}
+			else{
+				destination = map.getNearestWater(me.getPos(), me.getCurrentFuel());
+				checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 			}
 		}
 
