@@ -109,7 +109,7 @@ public class HeadQuarter extends Agent {
 						}
 						if(contentObject instanceof FireStarter) {
 							Fire fire = new Fire(((FireStarter) contentObject).getPos(),((FireStarter) contentObject).getIntensity());
-							queue.push(fire);
+							queue.add(fire);
 							map.addFire(fire);
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
 						}
@@ -141,16 +141,20 @@ public class HeadQuarter extends Agent {
 			Map<String,Double> closestFighters = map.calculateClosestFighters(targetFire.getPos());
 			String chosenFighter = null;
 
-			while(chosenFighter == null) {
-				for (String fighter : closestFighters.keySet()) {
-					ArrayList<Position> poss = new ArrayList<>();
-					poss.add(targetFire.getPos());
-					if(fighters.get(fighter).isAvailable() && map.inRange(fighters.get(fighter), poss)) {
-						chosenFighter = fighter;
-						break;
-					}
+
+			for (String fighter : closestFighters.keySet()) {
+				if(fighters.get(fighter).isAvailable() && map.inRange(fighters.get(fighter), targetFire.getPos())) {
+					chosenFighter = fighter;
+					break;
 				}
 			}
+			if(chosenFighter == null) {
+				queue.add(targetFire);
+				block();
+				return;
+			}
+
+
 
 
 			try{

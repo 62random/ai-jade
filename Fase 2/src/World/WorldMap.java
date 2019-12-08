@@ -1,4 +1,5 @@
 package World;
+import Agents.Fighter;
 import Graphics.Configs;
 import Main.MainContainer;
 
@@ -230,23 +231,27 @@ public class WorldMap implements Serializable {
 		return list;
 	}
 
-	public boolean inRange(FighterInfo fighterInfo, ArrayList<Position> poss) {
-
-		Position current = poss.get(poss.size()-1);
-		if(current.steps(fighterInfo.getPos()) < fighterInfo.getCurrentFuel() / 2)
-			return true;
-		else {
-			boolean ret = false;
-			ArrayList<Position> nextit;
-			for (Map.Entry<Path, Integer> e : map.get(current).getPaths().getPaths().entrySet()){
-				if(e.getKey().getPos().notIn(poss) && e.getValue() <= fighterInfo.getFuelCapacity()) {
-					nextit = new ArrayList<>(poss);
-					nextit.add(e.getKey().getPos());
-					ret = ret || inRange(fighterInfo, nextit);
-				}
+	public boolean inRange(FighterInfo fighterInfo, Position destination) {
+		TreeMap<Position, Integer> steps = new TreeMap<Position, Integer>(Position.getComparator());
+		Path current = map.get(destination).getPaths();
+		int min = Configs.MAP_SIZE;
+		for( int i : current.getPaths().values())
+			if (i < min)
+				min = i;
+		boolean ret = false;
+		if(current.getPos().steps(fighterInfo.getPos()) + min < fighterInfo.getCurrentFuel())
+			ret = true;
+		else if(min*2 < fighterInfo.getFuelCapacity()) {
+			fillStepsTable(steps, current, fighterInfo.getFuelCapacity());
+			for (Position p : steps.keySet()){
+				if(p.steps(fighterInfo.getPos()) < fighterInfo.getCurrentFuel())
+					ret = true;
 			}
-			return ret;
 		}
+		else{
+			ret = false;
+		}
+		return ret;
 	}
 
 	public  void fillStepsTable(TreeMap<Position, Integer> steps, Path p, int fuel){
@@ -273,6 +278,7 @@ public class WorldMap implements Serializable {
 		for( int i : current.getPaths().values())
 			if (i < min)
 				min = i;
+
 		if(current.getPos().steps(fighterInfo.getPos()) + min < fighterInfo.getCurrentFuel())
 			return current.getPos();
 
@@ -290,12 +296,12 @@ public class WorldMap implements Serializable {
 		return ret;
 	}
 
-	public Position getNearestFuel(FighterInfo fighterInfo) {
+	public Position getNearestFuel(Position pos, int fuel) {
 		int min = Configs.MAP_SIZE;
-		Position ret = fighterInfo.getPos();
+		Position ret = null;
 
-		for (Map.Entry<Path, Integer> e : map.get(fighterInfo.getPos()).getPaths().getPaths().entrySet()) {
-			if (e.getValue() < fighterInfo.getCurrentFuel() && e.getValue() < min) {
+		for (Map.Entry<Path, Integer> e : map.get(pos).getPaths().getPaths().entrySet()) {
+			if (e.getValue() < fuel && e.getValue() < min) {
 				min = e.getValue();
 				ret = e.getKey().getPos();
 			}

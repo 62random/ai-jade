@@ -15,7 +15,7 @@ public class Window extends JFrame implements Runnable{
 
         this.world = world;
         setTitle("AI 2019");
-        setSize(1000, 625);
+        setSize(1000, 630);
         Dimension dim = new Dimension(500, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);

@@ -285,27 +285,29 @@ public class Fighter extends Agent {
 		//substituir mais tarde o que está aqui no meio por comportamento inteligente
 		if(destination.equals(me.getPos())) {
 			if (me.getCurrentWater() > 0){
-				ArrayList<Position> poss; FighterInfo fInfo = new FighterInfo(me);
+				FighterInfo fInfo = new FighterInfo(me);
 				if(p.getAdjacentDown() != null && map.getMap().get(p.getAdjacentDown()) != null && map.getMap().get(p.getAdjacentDown()).isBurning()) {
-					poss = new ArrayList<>(); poss.add(p.getAdjacentDown());
-					if(map.inRange(fInfo, poss)) {
-						checkpoint = destination = p.getAdjacentDown();
+					if(map.inRange(fInfo, p.getAdjacentDown())) {
+						destination = p.getAdjacentDown();
+						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 					}
 				} else if(p.getAdjacentLeft() != null && map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning()) {
-					poss = new ArrayList<>(); poss.add(p.getAdjacentLeft());
-					if(map.inRange(fInfo, poss))
-						checkpoint = destination = p.getAdjacentLeft();
+					if(map.inRange(fInfo, p.getAdjacentLeft())) {
+						destination = p.getAdjacentLeft();
+						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
+					}
 				}else if(p.getAdjacentUp() != null && map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning()) {
-					poss = new ArrayList<>(); poss.add(p.getAdjacentUp());
-					if(map.inRange(fInfo, poss))
-						checkpoint = destination = p.getAdjacentUp();
+					if(map.inRange(fInfo, p.getAdjacentUp())) {
+						destination = p.getAdjacentUp();
+						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
+					}
 				} else if(p.getAdjacentRight() != null && map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning()) {
-					poss = new ArrayList<>();
-					poss.add(p.getAdjacentRight());
-					if (map.inRange(fInfo, poss))
-						checkpoint = destination = p.getAdjacentRight();
+					if (map.inRange(fInfo, p.getAdjacentRight())) {
+						destination = p.getAdjacentRight();
+						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
+					}
 				}else if (me.getCurrentFuel() < me.getFuelCapacity()){
-					checkpoint = destination = map.getNearestFuel(new FighterInfo(me));
+					checkpoint = destination = map.getNearestFuel(fInfo.getPos(), fInfo.getCurrentFuel());
 				} else {
 					me.setAvailable(true);
 					this.myAgent.addBehaviour(new NotifyOfState());
