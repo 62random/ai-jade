@@ -4,68 +4,83 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import org.jfree.chart.*;
 
-import Statistics.*;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
 
 public class Stats extends JPanel {
-    Statistics.Stats stats;
+    private Statistics.Stats stats;
+    private JLabel firesLitLabel, firesLitValue;
+    private JLabel firesExtinguishedLabel, firesExtinguishedValue;
+    private JLabel firesExtinguishedDronesLabel, firesExtinguishedDronesValue;
+    private JLabel firesExtinguishedAircraftsLabel, firesExtinguishedAircraftsValue;
+    private JLabel firesExtinguishedTrucksLabel, firesExtinguishedTrucksValue;
+    private JLabel avgTimeLabel, avgTimeValue;
+    private JLabel waterRefillsLabel, waterRefillsValue;
+    private JLabel fuelRefillsLabel, fuelRefillsValue;
+
+
+
+    public Statistics.Stats getStats() {
+        return stats;
+    }
 
     public Stats(Statistics.Stats stats){
         this.stats = stats;
+
+
         Border blackline = BorderFactory.createTitledBorder("Statistics");
         setBorder(blackline);
-        JLabel cena = new JLabel("Estatísticas");
-        add(cena);
 
-        CategoryDataset dataset = createDataset();
-        JFreeChart chart = ChartFactory.createBarChart("Fires Extinguished per Agent", "Agent", "Fires Cos pigs", dataset, PlotOrientation.VERTICAL,false, false, false);
-        Color backiii = UIManager.getColor ( "Panel.background" );
-        chart.setBackgroundPaint(backiii);
+        setLayout(new GridLayout(0, 1));
+
+        JPanel up = new JPanel(new GridLayout(0, 2));
+        JPanel down = new JPanel(new GridLayout(0, 2));
+        up.setBorder(BorderFactory.createTitledBorder("Fires"));
+        down.setBorder(BorderFactory.createTitledBorder("Efficiency"));
+        add(up);
+        add(down);
+
+        firesLitLabel = new JLabel("Fires Lit: "); up.add(firesLitLabel);
+        firesLitValue = new JLabel("0"); up.add(firesLitValue);
+
+        firesExtinguishedLabel = new JLabel("Fires Extinguished: "); up.add(firesExtinguishedLabel);
+        firesExtinguishedValue = new JLabel("0 (0%)"); up.add(firesExtinguishedValue);
+
+        firesExtinguishedAircraftsLabel = new JLabel("Fires Extinguished by Aircrafts: "); up.add(firesExtinguishedAircraftsLabel);
+        firesExtinguishedAircraftsValue = new JLabel("0"); up.add(firesExtinguishedAircraftsValue);
+
+        firesExtinguishedDronesLabel = new JLabel("Fires Extinguished by Drones: "); up.add(firesExtinguishedDronesLabel);
+        firesExtinguishedDronesValue = new JLabel("0"); up.add(firesExtinguishedDronesValue);
+
+        firesExtinguishedTrucksLabel = new JLabel("Fires Extinguished by Trucks: "); up.add(firesExtinguishedTrucksLabel);
+        firesExtinguishedTrucksValue = new JLabel("0"); up.add(firesExtinguishedTrucksValue);
+
+        avgTimeLabel = new JLabel("Average Time to extinct fires: "); down.add(avgTimeLabel);
+        avgTimeValue = new JLabel("0"); down.add(avgTimeValue);
+
+        fuelRefillsLabel = new JLabel("Fuel refilled volume: "); down.add(fuelRefillsLabel);
+        fuelRefillsValue = new JLabel("0"); down.add(fuelRefillsValue);
+
+        waterRefillsLabel = new JLabel("Water refilled volume: "); down.add(waterRefillsLabel);
+        waterRefillsValue = new JLabel("0"); down.add(waterRefillsValue);
 
 
-        XYSeries series = new XYSeries("keyyyy");
-        for (int i = 0; i < 100; i++)
-            series.add(stats.getAvgTimeBurning(), i);
-        XYSeriesCollection dataset2 = new XYSeriesCollection(series);
-        JFreeChart chart2 = ChartFactory.createXYLineChart(null, null, null, dataset2, PlotOrientation.HORIZONTAL, true, true, true);
-        ChartPanel chartpanel2 = new ChartPanel(chart2);
-
-
-        ChartPanel chartpanel = new ChartPanel(chart);
-        chartpanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
-        Color backg = new Color(193, 215, 215);
-        chart.getPlot().setBackgroundPaint(backg);
-
-        CategoryPlot categoryPlot = chart.getCategoryPlot();
-        BarRenderer br = (BarRenderer) categoryPlot.getRenderer();
-        br.setMaximumBarWidth(.15);
-        Color color = new Color(102, 255, 255);
-        br.setSeriesPaint(0, color);
-
-        setLayout(new BorderLayout());
-        add(chartpanel2, BorderLayout.CENTER);
-        add(chartpanel, BorderLayout.CENTER);
+        this.setVisible(true);
     }
 
-    private CategoryDataset createDataset() {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        firesLitValue.setText("" + stats.getFiresLit());
+        firesExtinguishedValue.setText("" + stats.getFiresExtinguished() + " (" +  100*stats.getFiresExtinguished()/(float) stats.getFiresLit() +"%)");
+        firesExtinguishedAircraftsValue.setText("" + 100*stats.getFiresExtinguishedByAircrafts()/(float) stats.getFiresExtinguished() + "%");
+        firesExtinguishedDronesValue.setText("" + 100*stats.getFiresExtinguishedByDrones()/(float) stats.getFiresExtinguished() + "%");
+        firesExtinguishedTrucksValue.setText("" + 100*stats.getFiresExtinguishedByTrucks()/(float) stats.getFiresExtinguished() + "%");
 
-        dataset.addValue(10, "Fires Cos pigs", "Truck");
-        dataset.addValue(20, "Fires Cos pigs", "Aircraft");
-        dataset.addValue(30, "Fires Cos pigs", "Drone");
+        avgTimeValue.setText("" + stats.getAvgTimeBurning() + "ms");
+        waterRefillsValue.setText(""+ stats.getWaterRefills() + " units");
+        fuelRefillsValue.setText(""+ stats.getFuelRefills() + " units");
 
-        return dataset;
     }
-
 
 }

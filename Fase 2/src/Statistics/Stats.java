@@ -78,7 +78,7 @@ public class Stats {
     }
 
     public void extinguishedFire(Fire f){
-        System.out.println("Fires extinguished " + (++this.firesExtinguished));
+        this.firesExtinguished++;
         this.updateAvgTimeBurning(System.currentTimeMillis() - f.getStartTime());
         switch (f.getExtinguisher()){
             case Configs.AG_AIRCRAFT:

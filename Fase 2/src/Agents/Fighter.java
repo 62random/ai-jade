@@ -164,6 +164,7 @@ public class Fighter extends Agent {
 		pos = new Position(map.getDimension()/2, map.getDimension()/2);
 
 		this.addBehaviour(new MoveToFire());
+
     }
 
 	private class NotifyOfRefill extends OneShotBehaviour{
@@ -246,7 +247,7 @@ public class Fighter extends Agent {
 		this.myAgent = f;
 		this.destination = destination;
 		if(checkpoint == null)
-			this.checkpoint = map.getCheckpoint(new FighterInfo((Fighter) myAgent), destination);
+			this.checkpoint = map.getCheckpoint(new FighterInfo(f), destination);
 		else
 			this.checkpoint = checkpoint;
 	}
@@ -259,6 +260,7 @@ public class Fighter extends Agent {
 		if(c.isBurning() && me.getCurrentWater() > 0) {
 			me.consumeWater();
 			Fire fire = map.getFires().values().stream().filter(f -> f.getPos().equals(p)).collect(Collectors.toList()).get(0);
+			fire.setActive(false);
 
 			if(myAgent instanceof Drone)
 				fire.setExtinguisher(Configs.AG_DRONE);
@@ -282,49 +284,41 @@ public class Fighter extends Agent {
 			addBehaviour(new NotifyOfRefill(Configs.CELL_FUEL, difference));
 		}
 
+		FighterInfo fInfo = new FighterInfo(me);
 		//substituir mais tarde o que está aqui no meio por comportamento inteligente
 		if(destination.equals(me.getPos())) {
 			if (me.getCurrentWater() > 0){
-				FighterInfo fInfo = new FighterInfo(me);
-				if(p.getAdjacentDown() != null && map.getMap().get(p.getAdjacentDown()) != null && map.getMap().get(p.getAdjacentDown()).isBurning()) {
-					if(map.inRange(fInfo, p.getAdjacentDown())) {
+
+				if(p.getAdjacentDown() != null && map.getMap().get(p.getAdjacentDown()) != null && map.getMap().get(p.getAdjacentDown()).isBurning() && map.inRange(fInfo, p.getAdjacentDown())) {
 						destination = p.getAdjacentDown();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
-					}
 				}
-				else if(p.getAdjacentLeft() != null && map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning()) {
-					if(map.inRange(fInfo, p.getAdjacentLeft())) {
+				else if(p.getAdjacentLeft() != null && map.getMap().get(p.getAdjacentLeft()) != null && map.getMap().get(p.getAdjacentLeft()).isBurning() && map.inRange(fInfo, p.getAdjacentLeft())) {
 						destination = p.getAdjacentLeft();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
-					}
 				}
-				else if(p.getAdjacentUp() != null && map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning()) {
-					if(map.inRange(fInfo, p.getAdjacentUp())) {
+				else if(p.getAdjacentUp() != null && map.getMap().get(p.getAdjacentUp()) != null && map.getMap().get(p.getAdjacentUp()).isBurning() && map.inRange(fInfo, p.getAdjacentUp())) {
 						destination = p.getAdjacentUp();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
-					}
 				}
-				else if(p.getAdjacentRight() != null && map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning()) {
-					if (map.inRange(fInfo, p.getAdjacentRight())) {
+				else if(p.getAdjacentRight() != null && map.getMap().get(p.getAdjacentRight()) != null && map.getMap().get(p.getAdjacentRight()).isBurning() && map.inRange(fInfo, p.getAdjacentRight())) {
 						destination = p.getAdjacentRight();
 						checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
-					}
 				}
 				else if (me.getCurrentFuel() < me.getFuelCapacity()){
 					checkpoint = destination = map.getNearestFuel(fInfo.getPos(), fInfo.getCurrentFuel());
 				}
-				else if (me.getCurrentWater() < me.getWaterCapacity()){
-					destination = map.getNearestWater(fInfo.getPos(), fInfo.getCurrentFuel());
+				else if (map.inRange(fInfo, map.getNearestWater(fInfo, fInfo.getCurrentFuel())) && me.getCurrentWater() == 0){
+					destination = map.getNearestWater(fInfo, fInfo.getCurrentFuel());
 					checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 				} else {
 					me.setAvailable(true);
 					this.myAgent.addBehaviour(new NotifyOfState());
-					block();
 					return;
 				}
 			}
 			else{
-				destination = map.getNearestWater(me.getPos(), me.getCurrentFuel());
+				destination = map.getNearestWater(fInfo, me.getCurrentFuel());
 				checkpoint = map.getCheckpoint(new FighterInfo(me), destination);
 			}
 		}
@@ -334,24 +328,21 @@ public class Fighter extends Agent {
 		}
 
 		me.consumeFuel();
-		try {
-			if (me.getCurrentFuel() > 0) {
-				if (p.getX() < checkpoint.getX()) {
-					me.moveRight();
-				} else if (p.getX() > checkpoint.getX()) {
-					me.moveLeft();
-				} else if (p.getY() < checkpoint.getY()) {
-					me.moveDown();
-				} else if (p.getY() > checkpoint.getY()) {
-					me.moveUp();
-				}
-			} else {
-				block();
-				return;
+
+		if (map.inRange(fInfo, checkpoint)) {
+			if (p.getX() < checkpoint.getX()) {
+				me.moveRight();
+			} else if (p.getX() > checkpoint.getX()) {
+				me.moveLeft();
+			} else if (p.getY() < checkpoint.getY()) {
+				me.moveDown();
+			} else if (p.getY() > checkpoint.getY()) {
+				me.moveUp();
 			}
-		} catch (NullPointerException e){
-			e.printStackTrace();
+		} else {
+			checkpoint = destination = map.getNearestFuel(fInfo.getPos(), fInfo.getCurrentFuel());
 		}
+
 
 
 		this.myAgent.addBehaviour(new NotifyOfState());
@@ -362,8 +353,10 @@ public class Fighter extends Agent {
 			e.printStackTrace();
 		}
 
-		me.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, checkpoint));
-		block();
+		if(destination != null)
+			me.addBehaviour(new MoveAndNotify((Fighter) this.myAgent, destination, checkpoint));
+		else
+			me.setAvailable(true);
 		return;
 	}
 }
@@ -463,6 +456,26 @@ public class Fighter extends Agent {
 			} catch (FIPAException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private class WakeUp extends TickerBehaviour {
+
+		public WakeUp(Agent a, long period) {
+			super(a, period);
+		}
+
+		@Override
+		protected void onTick() {
+			FighterInfo fInfo = new FighterInfo((Fighter) this.myAgent);
+
+			if(map.getMap().get(fInfo.getPos()).isFuel() || fInfo.isAvailable())
+				return;
+
+
+			Position pos = map.getNearestFuel(fInfo.getPos(), fInfo.getCurrentFuel());
+			if(pos!= null)
+				this.myAgent.addBehaviour(new MoveAndNotify((Fighter) myAgent, pos, null));
 		}
 	}
 }

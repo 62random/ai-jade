@@ -5,6 +5,7 @@ import Main.MainContainer;
 
 
 import java.io.Serializable;
+import java.lang.module.FindException;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -235,9 +236,10 @@ public class WorldMap implements Serializable {
 		TreeMap<Position, Integer> steps = new TreeMap<Position, Integer>(Position.getComparator());
 		Path current = map.get(destination).getPaths();
 		int min = Configs.MAP_SIZE;
-		for( int i : current.getPaths().values())
-			if (i < min)
-				min = i;
+		for( Path p : current.getPaths().keySet())
+			if (p.getPos().steps(destination) < min && p.getPos().steps(destination) < fighterInfo.getFuelCapacity())
+				min = p.getPos().steps(destination);
+
 		boolean ret = false;
 		if(current.getPos().steps(fighterInfo.getPos()) + min < fighterInfo.getCurrentFuel())
 			ret = true;
@@ -263,8 +265,8 @@ public class WorldMap implements Serializable {
 
 		for(Map.Entry<Path, Integer> e : p.getPaths().entrySet()) {
 			if(e.getValue() < fuel) {
-				if(steps.get(e.getKey().getPos()) == null || steps.get(e.getKey().getPos()) > current_steps + 1){
-					steps.put(e.getKey().getPos(), current_steps + 1);
+				if(steps.get(e.getKey().getPos()) == null || steps.get(e.getKey().getPos()) > current_steps + e.getValue()){
+					steps.put(e.getKey().getPos(), current_steps + e.getValue());
 					fillStepsTable(steps, e.getKey(), fuel);
 				}
 			}
@@ -275,9 +277,9 @@ public class WorldMap implements Serializable {
 		TreeMap<Position, Integer> steps = new TreeMap<Position, Integer>(Position.getComparator());
 		Path current = map.get(destination).getPaths();
 		int min = Configs.MAP_SIZE;
-		for( int i : current.getPaths().values())
-			if (i < min)
-				min = i;
+		for( Path p : current.getPaths().keySet())
+			if (p.getPos().steps(destination) < min)
+				min = p.getPos().steps(destination);
 
 		if(current.getPos().steps(fighterInfo.getPos()) + min < fighterInfo.getCurrentFuel())
 			return current.getPos();
@@ -310,7 +312,8 @@ public class WorldMap implements Serializable {
 		return  ret;
 	}
 
-	public Position getNearestWater(Position pos, int fuel) {
+	public Position getNearestWater(FighterInfo fInfo, int fuel) {
+		Position pos = fInfo.getPos();
 		Position ret = null;
 
 		int x = pos.getX() , y = pos.getY();
@@ -318,22 +321,22 @@ public class WorldMap implements Serializable {
 			for(int j = 0; j < Configs.MAP_SIZE; j++) {
 				if( x - i > 0 && x - i < Configs.MAP_SIZE && y - j > 0 && y - j < Configs.MAP_SIZE) {
 					ret = new Position(x - i, y - j);
-					if(map.get(ret).isWater())
+					if(map.get(ret).isWater() && inRange(fInfo, ret))
 						return ret;
 				}
 				else if( x - i > 0 && x - i < Configs.MAP_SIZE && y + j > 0 && y + j < Configs.MAP_SIZE) {
 					ret = new Position(x - i, y + j);
-					if(map.get(ret).isWater())
+					if(map.get(ret).isWater() && inRange(fInfo, ret))
 						return ret;
 				}
 				else if( x + i > 0 && x + i < Configs.MAP_SIZE && y - j > 0 && y - j < Configs.MAP_SIZE) {
 					ret = new Position(x + i, y - j);
-					if(map.get(ret).isWater())
+					if(map.get(ret).isWater() && inRange(fInfo, ret))
 						return ret;
 				}
 				else if( x + i > 0 && x + i < Configs.MAP_SIZE && y + j > 0 && y + j < Configs.MAP_SIZE) {
 					ret = new Position(x + i, y + j);
-					if(map.get(ret).isWater())
+					if(map.get(ret).isWater() && inRange(fInfo, ret))
 						return ret;
 				}
 			}

@@ -111,6 +111,7 @@ public class HeadQuarter extends Agent {
 							Fire fire = new Fire(((FireStarter) contentObject).getPos(),((FireStarter) contentObject).getIntensity());
 							queue.add(fire);
 							map.addFire(fire);
+							addBehaviour(new SendFireStats(fire));
 							System.out.println("Cell on position " + ((FireStarter) contentObject).getPos() + " is burning!");
 						}
 						break;
@@ -148,13 +149,12 @@ public class HeadQuarter extends Agent {
 					break;
 				}
 			}
+
 			if(chosenFighter == null) {
 				queue.add(targetFire);
 				block();
 				return;
 			}
-
-
 
 
 			try{
@@ -235,11 +235,10 @@ public class HeadQuarter extends Agent {
 			}
 	}
 
-
 	private class CheckFireQueue extends TickerBehaviour {
 
 		public CheckFireQueue(Agent a) {
-			super(a, Configs.TICK_DURATION/5);
+			super(a, Configs.TICK_DURATION/50);
 		}
 
 		@Override

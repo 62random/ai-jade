@@ -5,6 +5,11 @@ public final class Configs {
     //System Settings
     public final static int TICK_DURATION       = 100;
 
+
+    //window settings
+    public final static int WINDOW_HEIGHT       = 630;
+    public final static int WINDOW_WIDTH        = 1100;
+
     //Map settings
     public final static int MAP_SIZE            = 30;
     public final static int CELL_DIMENSION      = 20;

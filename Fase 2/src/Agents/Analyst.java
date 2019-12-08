@@ -56,6 +56,8 @@ public class Analyst extends Agent {
                             Fire f = (Fire) contentObject;
                             if(!f.isActive()){
                                 stats.extinguishedFire(f);
+                            } else {
+                                stats.incrementFiresLit(1);
                             }
                         }
                         else if (contentObject instanceof  String){
