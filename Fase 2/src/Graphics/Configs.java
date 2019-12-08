@@ -41,6 +41,7 @@ public final class Configs {
     public final static String IMG_AIRCRAFT     = "resources/map/aircraft.png";
     public final static String IMG_TRUCK        = "resources/map/truck.png";
     public final static String IMG_DRONE        = "resources/map/drone.png";
+    public final static String IMG_HEADQUARTER  = "resources/map/headquarter.png";
 
 
     public final static int CELL_FIRE           = 0;

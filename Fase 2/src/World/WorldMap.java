@@ -165,7 +165,10 @@ public class WorldMap implements Serializable {
 				pos = new Position(i, j);
 
 				tmp = r.nextInt(100);
-				if(tmp < Configs.PERCENT_FUEL_WATER) {
+				if(i == Configs.MAP_SIZE/2 && j == Configs.MAP_SIZE/2) {
+					c = new Cell(this, pos, true, true);    //Water and fuel
+				}
+				else if(tmp < Configs.PERCENT_FUEL_WATER) {
 					c = new Cell(this, pos, true, true);    //Water and fuel
 				}
 				else if(tmp < Configs.PERCENT_FUEL_WATER + Configs.PERCENT_WATER) {

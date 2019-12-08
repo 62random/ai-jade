@@ -15,7 +15,7 @@ public class Map extends JPanel {
 
     WorldMap world;
 
-    private BufferedImage grass_image, water_image, fire_image, truck_image, aircraft_image, drone_image, fuel_image;
+    private BufferedImage grass_image, water_image, fire_image, truck_image, aircraft_image, drone_image, fuel_image, headquarter_image;
 
     public Map(WorldMap world) {
         try {
@@ -26,6 +26,7 @@ public class Map extends JPanel {
             aircraft_image = ImageIO.read(new File(Configs.IMG_AIRCRAFT));
             drone_image = ImageIO.read(new File(Configs.IMG_DRONE));
             fuel_image = ImageIO.read(new File(Configs.IMG_FUEL));
+            headquarter_image = ImageIO.read(new File(Configs.IMG_HEADQUARTER));
             this.world = world;
         } catch (IOException ex) {
             System.out.println(ex.getStackTrace().toString());
@@ -47,27 +48,32 @@ public class Map extends JPanel {
         int x = Configs.CELL_DIMENSION*i, y = Configs.CELL_DIMENSION*j;
 
         g.drawImage(grass_image, x, y, this);
-        ArrayList<Integer> list = world.cellPropertiesOn(i,j);
-        if(list.contains(Configs.CELL_WATER)){
-            g.drawImage(water_image, x, y, this);
+        if(i == Configs.MAP_SIZE/2 && j == Configs.MAP_SIZE/2) {
+            g.drawImage(headquarter_image, x, y, this);
         }
-        if(list.contains(Configs.CELL_FUEL)){
-            g.drawImage(fuel_image, x, y, this);
-        }
-        if(list.contains(Configs.CELL_FIRE)){
-            g.drawImage(fire_image, x, y, this);
-        }
+        else {
+            ArrayList<Integer> list = world.cellPropertiesOn(i, j);
+            if (list.contains(Configs.CELL_FUEL)) {
+                g.drawImage(fuel_image, x, y, this);
+            }
+            if (list.contains(Configs.CELL_WATER)) {
+                g.drawImage(water_image, x, y, this);
+            }
+            if (list.contains(Configs.CELL_FIRE)) {
+                g.drawImage(fire_image, x, y, this);
+            }
 
-        list = world.agentsOn(i,j);
+            list = world.agentsOn(i, j);
 
-        if(list.contains(Configs.AG_TRUCK)){
-            g.drawImage(truck_image, x, y, this);
-        }
-        if(list.contains(Configs.AG_AIRCRAFT)){
-            g.drawImage(aircraft_image, x, y, this);
-        }
-        if(list.contains(Configs.AG_DRONE)){
-            g.drawImage(drone_image, x, y, this);
+            if (list.contains(Configs.AG_TRUCK)) {
+                g.drawImage(truck_image, x, y, this);
+            }
+            if (list.contains(Configs.AG_AIRCRAFT)) {
+                g.drawImage(aircraft_image, x, y, this);
+            }
+            if (list.contains(Configs.AG_DRONE)) {
+                g.drawImage(drone_image, x, y, this);
+            }
         }
 
 
