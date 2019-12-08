@@ -3,7 +3,7 @@ package Graphics;
 public final class Configs {
 
     //System Settings
-    public final static int TICK_DURATION       = 100;
+    public final static int TICK_DURATION       = 2000;
 
 
     //window settings
@@ -21,15 +21,15 @@ public final class Configs {
     public final static int PERCENT_FUEL        = 2;
 
     //AGENTS
-    public final static int TRUCK_FUEL          = 20;
-    public final static int DRONE_FUEL          = 8;
-    public final static int AIRCRAFT_FUEL       = 16;
-    public final static int TRUCK_WATER         = 8;
-    public final static int DRONE_WATER         = 2;
-    public final static int AIRCRAFT_WATER      = 4;
-    public final static int TRUCK_SPEED         = 1;
+    public final static int TRUCK_FUEL          = 15;
+    public final static int DRONE_FUEL          = 10;
+    public final static int AIRCRAFT_FUEL       = 20;
+    public final static int TRUCK_WATER         = 10;
+    public final static int DRONE_WATER         = 5;
+    public final static int AIRCRAFT_WATER      = 15;
+    public final static int TRUCK_SPEED         = 2;
     public final static int DRONE_SPEED         = 4;
-    public final static int AIRCRAFT_SPEED      = 2;
+    public final static int AIRCRAFT_SPEED      = 1;
 
 
 
