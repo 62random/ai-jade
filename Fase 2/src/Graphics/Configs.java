@@ -3,7 +3,7 @@ package Graphics;
 public final class Configs {
 
     //System Settings
-    public final static int TICK_DURATION       = 300;
+    public final static int TICK_DURATION       = 100;
 
     //Map settings
     public final static int MAP_SIZE            = 30;
