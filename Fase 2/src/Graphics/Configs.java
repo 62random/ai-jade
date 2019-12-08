@@ -8,7 +8,7 @@ public final class Configs {
 
     //window settings
     public final static int WINDOW_HEIGHT       = 630;
-    public final static int WINDOW_WIDTH        = 1100;
+    public final static int WINDOW_WIDTH        = 1050;
 
     //Map settings
     public final static int MAP_SIZE            = 30;
@@ -21,15 +21,15 @@ public final class Configs {
     public final static int PERCENT_FUEL        = 2;
 
     //AGENTS
-    public final static int TRUCK_FUEL          = 15;
-    public final static int DRONE_FUEL          = 5;
-    public final static int AIRCRAFT_FUEL       = 20;
-    public final static int TRUCK_WATER         = 10;
+    public final static int TRUCK_FUEL          = 20;
+    public final static int DRONE_FUEL          = 8;
+    public final static int AIRCRAFT_FUEL       = 16;
+    public final static int TRUCK_WATER         = 8;
     public final static int DRONE_WATER         = 2;
-    public final static int AIRCRAFT_WATER      = 15;
-    public final static int TRUCK_SPEED         = 2;
+    public final static int AIRCRAFT_WATER      = 4;
+    public final static int TRUCK_SPEED         = 1;
     public final static int DRONE_SPEED         = 4;
-    public final static int AIRCRAFT_SPEED      = 1;
+    public final static int AIRCRAFT_SPEED      = 2;
 
 
 
@@ -46,7 +46,7 @@ public final class Configs {
 
     public final static int CELL_FIRE           = 0;
     public final static int CELL_WATER          = 1;
-    public final static int CELL_FUEL = 2;
+    public final static int CELL_FUEL           = 2;
 
     public final static int AG_TRUCK            = 1;
     public final static int AG_DRONE            = 2;
